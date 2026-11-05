@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e7eee7"><title>FÉNIX v40 · Mi vida organizada</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e7eee7"><title>FÉNIX v46 — FÉNIX v40 · Mi vida organizada</title><style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#293b35;background:#f7f5f0}*{box-sizing:border-box}body{margin:0}header{background:#e7eee7;padding:20px 16px;border-bottom:1px solid #cbd8ce}h1{margin:3px 0;font-size:clamp(23px,5vw,29px)}small,.muted{color:#64766e}main{max-width:820px;margin:auto;padding:14px}.tabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;scrollbar-width:thin}.tabs button{white-space:nowrap}button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid #c5d4ca;background:white;border-radius:11px;padding:10px 12px;color:#2b4437}.active,.primary{background:#365c4a;color:white;border-color:#365c4a}.panel{background:white;border:1px solid #dce5dd;border-radius:16px;padding:15px;margin:12px 0}h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:14px 0 8px}.entry{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #edf0eb}.entry:last-child{border:0}.time{width:53px;flex-shrink:0;color:#61756b;font-size:13px}.content{flex:1;min-width:0;overflow-wrap:anywhere}.content strong{display:block}.content small{display:block;margin-top:3px}.entry input[type=checkbox]{width:20px;height:20px;accent-color:#365c4a}.row{display:flex;gap:9px;flex-wrap:wrap}.row>*{flex:1;min-width:135px}.field{display:grid;gap:5px;margin:10px 0}input:not([type=checkbox]),select,textarea{width:100%;padding:11px;border:1px solid #bdcbc0;border-radius:10px;background:white}label{font-size:14px;font-weight:600}.foot{font-size:12px;line-height:1.6;color:#63746a}.note{background:#f0f5f0;border-radius:11px;padding:12px;line-height:1.5;font-size:14px}.empty{padding:20px;color:#68786e;text-align:center}dialog{border:0;border-radius:18px;width:min(95vw,550px);max-height:92vh;overflow:auto;box-shadow:0 15px 60px #0004}dialog::backdrop{background:#182b24aa}nav{position:sticky;bottom:0;background:#f7f5f0;border-top:1px solid #dce5dd;padding:10px;display:flex;justify-content:center;gap:7px;flex-wrap:wrap}.hidden{display:none}.mini{font-size:12px;padding:7px 9px}.chip{display:inline-block;padding:4px 8px;background:#edf3ec;border-radius:9px;font-size:12px;margin:2px}.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.week button{min-width:0;padding:8px 2px;font-size:13px}.sectionline{border-top:1px solid #e7eee7;margin-top:15px;padding-top:8px}@media(max-width:520px){.entry{gap:6px}.time{width:46px}.entry .mini{padding:7px}.panel{padding:12px}nav button{flex:1;min-width:90px;font-size:13px}}
 .searchbar{display:flex;gap:8px;margin:12px 0}.searchbar input{flex:1}.area-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.area-buttons button{font-size:13px;padding:8px}.tag{font-size:12px;color:#526c5b;background:#edf3ec;padding:4px 7px;border-radius:7px}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.subtle{font-size:13px;color:#64766e}.entry button{flex-shrink:0}@media(max-width:450px){.entry{gap:6px}.entry button{padding:7px}.time{width:44px;font-size:12px}} 
 /* FÉNIX v3.1: corrección de anchura en pantallas móviles */
@@ -665,12 +665,12 @@ function familySave(){try{localStorage.setItem(FENIX_FAMILY_KEY,JSON.stringify(f
 function familyDate(s){return s?parse(s).toLocaleDateString('es-ES'):'—'}
 function familyOnDay(e,d){if(e.type==='padre')return !!(e.start&&e.end&&d>=e.start&&d<=e.end);if(e.yearly)return !!(e.start&&e.start.slice(5)===d.slice(5));return e.start===d}
 function familyCards(d){const found=fenixFamily.filter(e=>familyOnDay(e,d));return found.length?`<section class="panel" id="fenix-family-agenda"><h2>👨‍👩‍👧 Vida personal y familia</h2>${found.map(e=>`<div class="entry"><div class="content"><strong>${esc(e.title)}</strong><small>${e.type==='padre'?'Fin de semana reservado · ':''}${esc(e.type==='padre'?(d===e.start?'Desde las '+(e.startTime||'10:00'):d===e.end?'Hasta las '+(e.endTime||'21:00'):'Periodo reservado'):e.time||'Sin hora')} · ${esc(e.status||'Confirmado')}</small></div><button type="button" data-family-edit="${esc(e.id)}">Editar</button></div>`).join('')}</section>`:''}
-function familySection(){const sorted=[...fenixFamily].sort((a,b)=>(a.start||'').localeCompare(b.start||''));return `<section class="panel" id="fenix-family"><h2>💗 Vida personal y familia</h2><p class="subtle">Cumpleaños, santos, bodas, comuniones y fines de semana con tu padre. Cada fin de semana se confirma por separado: no se inventan fechas mensuales.</p><details id="family-editor"><summary><strong>＋ Añadir fecha o compromiso</strong></summary><form id="family-form" class="fenix-guide-form"><input type="hidden" name="id"><label>Tipo<select name="type" id="family-type"><option value="cumple">Cumpleaños</option><option value="santo">Santo</option><option value="aniversario">Aniversario</option><option value="evento">Boda, comunión u otro evento</option><option value="padre">Fin de semana con papá</option></select></label><label>Nombre o descripción<input name="title" maxlength="120" required placeholder="Ej.: Cumpleaños de Ana"></label><label>Fecha de inicio<input name="start" type="date" required></label><label class="family-end">Fecha de finalización<input name="end" type="date"></label><label class="family-time">Hora (opcional)<input name="time" type="time"></label><div class="family-weekend" hidden><div class="row"><label>Inicio del sábado<input name="startTime" type="time" value="10:00"></label><label>Final del domingo<input name="endTime" type="time" value="21:00"></label></div><p class="subtle">Puedes cambiar las fechas si intercambias el fin de semana con tus hermanos.</p></div><label class="family-yearly"><input type="checkbox" name="yearly"><span>Repetir cada año</span></label><label>Estado<select name="status"><option>Confirmado</option><option>Provisional</option><option>Cancelado</option></select></label><label>Notas (opcional)<textarea name="notes" placeholder="Lugar, regalo, cambio de fecha…"></textarea></label><div class="fenix-guide-controls"><button class="primary" type="submit">Guardar</button><button type="button" data-family-cancel>Cancelar</button></div></form></details><h3>Mis fechas y compromisos</h3>${sorted.map(e=>`<div class="entry"><div class="content"><strong>${esc(e.title)}</strong><small>${familyDate(e.start)}${e.end?' – '+familyDate(e.end):''}${e.yearly?' · Cada año':''} · ${esc(e.status||'Confirmado')}</small>${e.notes?`<small>${esc(e.notes)}</small>`:''}</div><button type="button" data-family-edit="${esc(e.id)}">Editar</button><button type="button" data-family-delete="${esc(e.id)}">Eliminar</button></div>`).join('')||'<p class="subtle">Todavía no hay fechas familiares guardadas.</p>'}</section>`}
+function familySection(){const sorted=[...fenixFamily].sort((a,b)=>(a.start||'').localeCompare(b.start||''));return `<section class="panel" id="fenix-family"><h2>💗 Vida personal y familia</h2><p class="subtle">Cumpleaños, santos, bodas, comuniones y fines de semana con tu padre. Cada fin de semana se confirma por separado: no se inventan fechas mensuales.</p><details id="family-editor"><summary><strong>＋ Añadir fecha o compromiso</strong></summary><form id="family-form" class="fenix-guide-form"><input type="hidden" name="id"><label>Tipo<select name="type" id="family-type"><option value="cumple">Cumpleaños</option><option value="santo">Santo</option><option value="aniversario">Aniversario</option><option value="evento">Boda, comunión u otro evento</option><option value="padre">Fin de semana con papá</option></select></label><label>Nombre o descripción<input name="title" maxlength="120" required placeholder="Ej.: Cumpleaños de Ana"></label><label>Fecha de inicio<input name="start" type="date" required></label><label class="family-end">Fecha de finalización<input name="end" type="date"></label><label class="family-time">Hora (opcional)<input name="time" type="time"></label><div class="family-weekend" hidden><div class="row"><label>Inicio del sábado<input name="startTime" type="time" value="10:00"></label><label>Final del domingo<input name="endTime" type="time" value="21:00"></label></div><p class="subtle">Puedes cambiar las fechas si intercambias el fin de semana con tus hermanos.</p></div><label class="family-yearly"><input type="checkbox" name="yearly"><span>Repetir cada año</span></label><label>Estado<select name="status"><option>Confirmado</option><option>Provisional</option><option>Cancelado</option></select></label><label>Notas (opcional)<textarea name="notes" placeholder="Lugar, regalo, cambio de fecha…"></textarea></label><div class="fenix-guide-controls"><button class="primary" type="button" data-family-save="1">Guardar</button><button type="button" data-family-cancel>Cancelar</button></div></form></details><h3>Mis fechas y compromisos</h3>${sorted.map(e=>`<div class="entry"><div class="content"><strong>${esc(e.title)}</strong><small>${familyDate(e.start)}${e.end?' – '+familyDate(e.end):''}${e.yearly?' · Cada año':''} · ${esc(e.status||'Confirmado')}</small>${e.notes?`<small>${esc(e.notes)}</small>`:''}</div><button type="button" data-family-edit="${esc(e.id)}">Editar</button><button type="button" data-family-delete="${esc(e.id)}">Eliminar</button></div>`).join('')||'<p class="subtle">Todavía no hay fechas familiares guardadas.</p>'}</section>`}
 function familyFormMode(){const f=document.getElementById('family-form');if(!f)return;const isWeekend=f.elements.type.value==='padre';f.querySelector('.family-weekend').hidden=!isWeekend;f.querySelector('.family-end').hidden=!isWeekend;f.querySelector('.family-time').hidden=isWeekend;f.querySelector('.family-yearly').hidden=isWeekend;if(isWeekend)f.elements.yearly.checked=false}
 const fenixRenderBeforeV36=render;
 render=function(){fenixRenderBeforeV36();if(searchText)return;const view=document.getElementById('view');if(!view)return;if(tab==='Familia'){view.innerHTML=familySection();familyFormMode()}else if(tab==='Hoy'||tab==='Semana'){const html=familyCards(selected);if(html)view.insertAdjacentHTML('beforeend',html)}else if(tab==='Mes'){const month=monthCursor;const marked=fenixFamily.filter(e=>e.start&&(e.start.slice(0,7)===month||e.yearly||e.type==='padre'));if(marked.length)view.insertAdjacentHTML('beforeend',`<section class="panel"><h2>💗 Fechas familiares</h2>${marked.filter(e=>e.yearly||e.start.slice(0,7)===month||(e.end&&e.end.slice(0,7)===month)).map(e=>`<p>${esc(e.title)} · ${familyDate(e.start)}${e.yearly?' (anual)':''}</p>`).join('')}</section>`)}};
 document.addEventListener('change',e=>{if(e.target.id==='family-type')familyFormMode()});
-document.addEventListener('submit',e=>{if(e.target.id!=='family-form')return;e.preventDefault();const f=e.target;const type=f.elements.type.value,start=f.elements.start.value,end=type==='padre'?f.elements.end.value:'';if(type==='padre'&&(!end||end<start)){alert('Indica una fecha de finalización igual o posterior al inicio.');return}const id=f.elements.id.value;const entry={id:id||'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),type,title:f.elements.title.value.trim(),start,end,time:f.elements.time.value,startTime:f.elements.startTime.value,endTime:f.elements.endTime.value,yearly:type!=='padre'&&f.elements.yearly.checked,status:f.elements.status.value,notes:f.elements.notes.value.trim()};if(!entry.title)return;const ix=fenixFamily.findIndex(x=>x.id===id);if(ix>=0)fenixFamily[ix]=entry;else fenixFamily.push(entry);if(familySave())render()});
+
 document.addEventListener('click',e=>{const edit=e.target.closest('[data-family-edit]');if(edit){const x=fenixFamily.find(v=>v.id===edit.dataset.familyEdit);if(!x)return;tab='Familia';render();const f=document.getElementById('family-form');for(const k of ['id','type','title','start','end','time','startTime','endTime','status','notes'])if(f.elements[k])f.elements[k].value=x[k]||'';f.elements.yearly.checked=!!x.yearly;familyFormMode();document.getElementById('family-editor').open=true;f.scrollIntoView({block:'center'});return}const del=e.target.closest('[data-family-delete]');if(del){if(!confirm('¿Eliminar este compromiso familiar?'))return;fenixFamily=fenixFamily.filter(x=>x.id!==del.dataset.familyDelete);if(familySave())render();return}if(e.target.closest('[data-family-cancel]')){const f=document.getElementById('family-form');if(f)f.reset();document.getElementById('family-editor').open=false}});
 /* FÉNIX v37: reserva familiar visible en la planificación y fechas en impresión. */
 function fenixReservedDays(d){return fenixFamily.filter(f=>f.type==='padre'&&f.status!=='Cancelado'&&familyOnDay(f,d))}
@@ -849,32 +849,56 @@ render();
 .fenix-family-month-event{font-size:.72rem;line-height:1.2;display:block;overflow-wrap:anywhere;margin-top:3px;color:#265a42}
 </style>
 <script>
-/* v45: family form submission handled before any older delegated handler. */
-document.addEventListener('submit',function(ev){
- if(ev.target?.id!=='family-form')return;
- ev.preventDefault();ev.stopImmediatePropagation();
- const f=ev.target;
+/* v46: one family-save implementation; capture click prevents accidental form navigation. */
+function fenixSaveFamilyV46(f){
  const val=name=>f.querySelector('[name="'+name+'"]')?.value||'';
  const type=val('type'),start=val('start'),end=type==='padre'?val('end'):'';
  const title=val('title').trim();
- if(!title||!/^\d{4}-\d{2}-\d{2}$/.test(start)){alert('Escribe el nombre y selecciona una fecha válida.');return}
- if(type==='padre'&&(!end||end<start)){alert('Revisa la fecha final del fin de semana.');return}
+ if(!title||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(start)){
+  alert('Escribe el nombre y selecciona una fecha válida.');return;
+ }
+ if(type==='padre'&&(!end||end<start)){
+  alert('Revisa la fecha final del fin de semana.');return;
+ }
  const id=val('id')||'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
  const entry={id,type,title,start,end,time:val('time'),startTime:val('startTime'),endTime:val('endTime'),yearly:type!=='padre'&&!!f.querySelector('[name="yearly"]')?.checked,status:val('status'),notes:val('notes').trim()};
  const old=fenixFamily.findIndex(x=>x.id===id);
  const next=fenixFamily.slice();if(old>=0)next[old]=entry;else next.push(entry);
- try{localStorage.setItem(FENIX_FAMILY_KEY,JSON.stringify(next));fenixFamily=next}catch(err){alert('No se ha podido guardar. Revisa el almacenamiento de Chrome.');return}
- tab='Familia';searchText='';const search=document.getElementById('search');if(search)search.value='';
+ try{
+  localStorage.setItem(FENIX_FAMILY_KEY,JSON.stringify(next));
+  const verified=JSON.parse(localStorage.getItem(FENIX_FAMILY_KEY)||'[]');
+  if(!verified.some(x=>x.id===id&&x.title===title&&x.start===start))throw Error('No se pudo verificar el guardado');
+  fenixFamily=next;
+ }catch(err){alert('No se ha podido guardar el cumpleaños. No se han enviado datos a Google.');return}
+ tab='Familia';searchText='';
+ const search=document.getElementById('search');if(search)search.value='';
  render();
  const section=document.getElementById('fenix-family');
- if(section){const notice=document.createElement('div');notice.className='fenix-family-confirm';notice.setAttribute('role','status');notice.textContent='✓ Guardado correctamente: '+title;const heading=section.querySelector('h3');heading?.before(notice);section.scrollIntoView({block:'start'});}
+ if(section){
+  const notice=document.createElement('p');notice.className='fenix-family-confirm';notice.setAttribute('role','status');
+  notice.textContent='✓ Guardado y comprobado: '+title;
+  section.querySelector('h3')?.before(notice);
+  section.scrollIntoView({block:'start'});
+ }
+}
+document.addEventListener('click',function(ev){
+ const btn=ev.target.closest('#family-form [data-family-save]');
+ if(!btn)return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ const f=btn.closest('form');if(!f)return;
+ if(!f.reportValidity())return;
+ fenixSaveFamilyV46(f);
 },true);
-/* Show yearly family dates on each monthly day, not only in a separate list. */
-const fenixRenderBeforeV45=render;
+document.addEventListener('submit',function(ev){
+ if(ev.target?.id!=='family-form')return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ fenixSaveFamilyV46(ev.target);
+},true);
+/* Show yearly dates in the individual monthly cells. */
+const fenixRenderBeforeV46=render;
 render=function(){
- fenixRenderBeforeV45();
+ fenixRenderBeforeV46();
  if(tab!=='Mes'||searchText)return;
- const [year,month]=monthCursor.split('-').map(Number);
  document.querySelectorAll('#view [data-monthday]').forEach(btn=>{
   const day=btn.dataset.monthday;
   const matches=fenixFamily.filter(e=>familyOnDay(e,day)&&e.status!=='Cancelado');
