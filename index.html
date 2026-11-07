@@ -1624,6 +1624,7 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v91-home .v92-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
 #fenix-v91-home .v92-actions button{border:1px solid #cadfd0;background:#fff;color:#28543c;border-radius:9px;padding:9px 10px;font-size:13px;flex:1 1 auto;min-width:88px}
 </style>
+
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -1667,6 +1668,7 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
 #fenix-v91-home .v92-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
 #fenix-v91-home .v92-actions button{border:1px solid #cadfd0;background:#fff;color:#28543c;border-radius:9px;padding:9px 10px;font-size:13px;flex:1 1 auto;min-width:88px}
 </style>
+
 </body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
 </script>
@@ -2094,7 +2096,8 @@ render();
   const original=document.createElement('div');original.innerHTML=fenixAlertsMarkup();
   const originalRows=[...original.querySelectorAll('.fenix-alert-items > .entry')];
   const isAppointment=e=>{
-   if(e.id.startsWith('ics-')||e.id.startsWith('fam-'))return true;
+   if(e.id.startsWith('fam-'))return false; // Las fechas familiares no son citas
+   if(e.id.startsWith('ics-'))return true;
    if(!e.id.startsWith('task-'))return false;
    return state.tasks.some(t=>t.kind==='cita'&&e.id==='task-'+t.id+'-'+e.date);
   };
@@ -2111,7 +2114,7 @@ render();
   upcoming.appendChild(list);
   const settings=document.createElement('details');settings.className='fenix-v88-settings';
   const summary=document.createElement('summary');summary.textContent='Ver citas y gestionar avisos';settings.appendChild(summary);
-  const hint=document.createElement('p');hint.className='subtle';hint.textContent='Los avisos de Samsung requieren exportar cada cita al calendario. Google Calendar no se sincroniza automáticamente.';settings.appendChild(hint);
+  const hint=document.createElement('p');hint.className='subtle';hint.textContent='Las citas pueden enviarse a Google Calendar si activas «Guardar también en Google Calendar» al crearlas. Samsung Calendar puede mostrarlas y avisarte si la cuenta está sincronizada. El botón «Aviso Samsung» exporta un archivo .ics alternativo; evita importar dos veces el mismo evento.';settings.appendChild(hint);
   const pref=document.createElement('label');pref.setAttribute('for','fenix-alert-days');pref.textContent='Mostrar próximos ';settings.appendChild(pref);
   const select=original.querySelector('#fenix-alert-days');if(select)settings.appendChild(select);
   const full=document.createElement('div');full.className='fenix-alert-items';
@@ -2215,4 +2218,25 @@ render();
 #fenix-v91-home .v92-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
 #fenix-v91-home .v92-actions button{border:1px solid #cadfd0;background:#fff;color:#28543c;border-radius:9px;padding:9px 10px;font-size:13px;flex:1 1 auto;min-width:88px}
 </style>
+
+<style id="fenix-v95-style">
+#fenix-v95-calendar-shortcut{display:block;width:100%;margin:8px 0 10px;border:1px solid #c7ddcf;border-radius:11px;background:#edf6ef;color:#28543c;font-weight:700;padding:11px 12px;min-height:44px;text-align:center}
+#fenix-v95-calendar-shortcut:focus-visible{outline:3px solid #428765;outline-offset:2px}
+</style>
+<script id="fenix-v95-calendar-shortcut">
+/* V95: acceso rápido sin cambiar permisos, credenciales ni sincronización. */
+(function(){'use strict';
+ const menu=document.querySelector('.section-menu');
+ if(!menu||document.getElementById('fenix-v95-calendar-shortcut'))return;
+ const btn=document.createElement('button');btn.type='button';btn.id='fenix-v95-calendar-shortcut';
+ btn.textContent='📅 Configurar Google Calendar';
+ btn.addEventListener('click',function(){
+   const pick=document.getElementById('sectionpick');if(!pick)return;
+   pick.value='Familia';pick.dispatchEvent(new Event('change',{bubbles:true}));
+   const panel=document.getElementById('fenix-google-panel');
+   if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
+ });
+ menu.insertAdjacentElement('afterend',btn);
+})();
+</script>
 </body></html>
