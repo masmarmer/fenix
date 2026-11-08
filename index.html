@@ -1698,6 +1698,67 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
+
+<style id="fenix-v111-week-nav-style">
+#fenix-v111-week-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 14px;padding:10px;border:1px solid #dce8df;border-radius:12px;background:#f5faf6}
+#fenix-v111-week-nav button{min-width:43px;min-height:42px;padding:7px 11px;border:1px solid #c6d9cd;border-radius:9px;background:white;color:#28543c;font-size:23px}
+#fenix-v111-week-nav .fenix-v111-range{text-align:center;font-weight:700;color:#28543c;font-size:.93rem}
+#fenix-v111-week-nav .fenix-v111-today{font-size:.78rem;min-height:34px;padding:5px 10px}
+#fenix-v111-special{margin-top:12px;padding:12px;border:1px solid #dce8df;border-radius:12px;background:#f7fbf8}
+#fenix-v111-special h3{margin:0 0 7px;font-size:1rem}
+#fenix-v111-special p{margin:5px 0;font-size:.93rem}
+#fenix-v111-week-nav button:focus-visible{outline:3px solid #338c66;outline-offset:2px}
+</style>
+<script id="fenix-v111-week-nav">
+/* V111: navegación entre semanas y fechas familiares visibles, sin alterar datos ni Google Calendar. */
+(function(){'use strict';
+ const previousRender=render;
+ const dateFor=(s)=>parse(s);
+ const mondayOf=(s)=>{const d=dateFor(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return d};
+ const datePlus=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+ const pretty=(d)=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+ const familyEvents=(date)=>typeof fenixFamily==='undefined'?[]:fenixFamily.filter(f=>f.status!=='Cancelado'&&familyOnDay(f,date));
+ render=function(){
+   previousRender();
+   if(searchText)return;
+   const view=document.getElementById('view');if(!view)return;
+   if(tab==='Semana'){
+     const start=mondayOf(selected),end=datePlus(start,6);
+     const panel=view.querySelector('#fenix-v107-week')||view.querySelector('.panel');
+     if(panel){
+       const nav=document.createElement('div');nav.id='fenix-v111-week-nav';
+       nav.innerHTML='<button type="button" data-fenix-week-step="-7" aria-label="Semana anterior">‹</button>'+
+         '<div class="fenix-v111-range">'+esc(pretty(start)+' – '+pretty(end))+'<div><button type="button" class="fenix-v111-today" data-fenix-week-current="1">Esta semana</button></div></div>'+
+         '<button type="button" data-fenix-week-step="7" aria-label="Semana siguiente">›</button>';
+       panel.insertBefore(nav,panel.querySelector('h2')?.nextSibling||panel.firstChild);
+     }
+   }
+   if(tab==='Hoy'){
+     const events=[];
+     for(let i=0;i<7;i++){
+       const d=datePlus(dateFor(today),i),key=iso(d);
+       familyEvents(key).forEach(f=>events.push({date:key,entry:f}));
+     }
+     if(events.length){
+       const panel=document.createElement('section');panel.className='panel';panel.id='fenix-v111-special';
+       panel.innerHTML='<h3>🌸 Próximas fechas especiales</h3>'+events.map(({date,entry})=>
+         '<p>'+esc(entry.type==='cumple'?'🎂':'🌸')+' <strong>'+esc(dateFor(date).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'}))+'</strong> · '+esc(entry.title)+'</p>').join('');
+       view.insertBefore(panel,view.firstChild);
+     }
+   }
+ };
+ document.addEventListener('click',function(event){
+   const step=event.target.closest('[data-fenix-week-step]');
+   const current=event.target.closest('[data-fenix-week-current]');
+   if(!step&&!current)return;
+   event.preventDefault();event.stopPropagation();
+   if(current){selected=today;}
+   else {const d=dateFor(selected);d.setDate(d.getDate()+Number(step.dataset.fenixWeekStep));selected=iso(d);}
+   tab='Semana';render();
+ },true);
+ render();
+})();
+</script>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -1747,6 +1808,67 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
+
+<style id="fenix-v111-week-nav-style">
+#fenix-v111-week-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 14px;padding:10px;border:1px solid #dce8df;border-radius:12px;background:#f5faf6}
+#fenix-v111-week-nav button{min-width:43px;min-height:42px;padding:7px 11px;border:1px solid #c6d9cd;border-radius:9px;background:white;color:#28543c;font-size:23px}
+#fenix-v111-week-nav .fenix-v111-range{text-align:center;font-weight:700;color:#28543c;font-size:.93rem}
+#fenix-v111-week-nav .fenix-v111-today{font-size:.78rem;min-height:34px;padding:5px 10px}
+#fenix-v111-special{margin-top:12px;padding:12px;border:1px solid #dce8df;border-radius:12px;background:#f7fbf8}
+#fenix-v111-special h3{margin:0 0 7px;font-size:1rem}
+#fenix-v111-special p{margin:5px 0;font-size:.93rem}
+#fenix-v111-week-nav button:focus-visible{outline:3px solid #338c66;outline-offset:2px}
+</style>
+<script id="fenix-v111-week-nav">
+/* V111: navegación entre semanas y fechas familiares visibles, sin alterar datos ni Google Calendar. */
+(function(){'use strict';
+ const previousRender=render;
+ const dateFor=(s)=>parse(s);
+ const mondayOf=(s)=>{const d=dateFor(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return d};
+ const datePlus=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+ const pretty=(d)=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+ const familyEvents=(date)=>typeof fenixFamily==='undefined'?[]:fenixFamily.filter(f=>f.status!=='Cancelado'&&familyOnDay(f,date));
+ render=function(){
+   previousRender();
+   if(searchText)return;
+   const view=document.getElementById('view');if(!view)return;
+   if(tab==='Semana'){
+     const start=mondayOf(selected),end=datePlus(start,6);
+     const panel=view.querySelector('#fenix-v107-week')||view.querySelector('.panel');
+     if(panel){
+       const nav=document.createElement('div');nav.id='fenix-v111-week-nav';
+       nav.innerHTML='<button type="button" data-fenix-week-step="-7" aria-label="Semana anterior">‹</button>'+
+         '<div class="fenix-v111-range">'+esc(pretty(start)+' – '+pretty(end))+'<div><button type="button" class="fenix-v111-today" data-fenix-week-current="1">Esta semana</button></div></div>'+
+         '<button type="button" data-fenix-week-step="7" aria-label="Semana siguiente">›</button>';
+       panel.insertBefore(nav,panel.querySelector('h2')?.nextSibling||panel.firstChild);
+     }
+   }
+   if(tab==='Hoy'){
+     const events=[];
+     for(let i=0;i<7;i++){
+       const d=datePlus(dateFor(today),i),key=iso(d);
+       familyEvents(key).forEach(f=>events.push({date:key,entry:f}));
+     }
+     if(events.length){
+       const panel=document.createElement('section');panel.className='panel';panel.id='fenix-v111-special';
+       panel.innerHTML='<h3>🌸 Próximas fechas especiales</h3>'+events.map(({date,entry})=>
+         '<p>'+esc(entry.type==='cumple'?'🎂':'🌸')+' <strong>'+esc(dateFor(date).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'}))+'</strong> · '+esc(entry.title)+'</p>').join('');
+       view.insertBefore(panel,view.firstChild);
+     }
+   }
+ };
+ document.addEventListener('click',function(event){
+   const step=event.target.closest('[data-fenix-week-step]');
+   const current=event.target.closest('[data-fenix-week-current]');
+   if(!step&&!current)return;
+   event.preventDefault();event.stopPropagation();
+   if(current){selected=today;}
+   else {const d=dateFor(selected);d.setDate(d.getDate()+Number(step.dataset.fenixWeekStep));selected=iso(d);}
+   tab='Semana';render();
+ },true);
+ render();
+})();
+</script>
 </body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
 </script>
@@ -2514,6 +2636,67 @@ document.addEventListener('click',function(event){
      picker.value='';render();
    }
  });
+ render();
+})();
+</script>
+
+<style id="fenix-v111-week-nav-style">
+#fenix-v111-week-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 14px;padding:10px;border:1px solid #dce8df;border-radius:12px;background:#f5faf6}
+#fenix-v111-week-nav button{min-width:43px;min-height:42px;padding:7px 11px;border:1px solid #c6d9cd;border-radius:9px;background:white;color:#28543c;font-size:23px}
+#fenix-v111-week-nav .fenix-v111-range{text-align:center;font-weight:700;color:#28543c;font-size:.93rem}
+#fenix-v111-week-nav .fenix-v111-today{font-size:.78rem;min-height:34px;padding:5px 10px}
+#fenix-v111-special{margin-top:12px;padding:12px;border:1px solid #dce8df;border-radius:12px;background:#f7fbf8}
+#fenix-v111-special h3{margin:0 0 7px;font-size:1rem}
+#fenix-v111-special p{margin:5px 0;font-size:.93rem}
+#fenix-v111-week-nav button:focus-visible{outline:3px solid #338c66;outline-offset:2px}
+</style>
+<script id="fenix-v111-week-nav">
+/* V111: navegación entre semanas y fechas familiares visibles, sin alterar datos ni Google Calendar. */
+(function(){'use strict';
+ const previousRender=render;
+ const dateFor=(s)=>parse(s);
+ const mondayOf=(s)=>{const d=dateFor(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return d};
+ const datePlus=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+ const pretty=(d)=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+ const familyEvents=(date)=>typeof fenixFamily==='undefined'?[]:fenixFamily.filter(f=>f.status!=='Cancelado'&&familyOnDay(f,date));
+ render=function(){
+   previousRender();
+   if(searchText)return;
+   const view=document.getElementById('view');if(!view)return;
+   if(tab==='Semana'){
+     const start=mondayOf(selected),end=datePlus(start,6);
+     const panel=view.querySelector('#fenix-v107-week')||view.querySelector('.panel');
+     if(panel){
+       const nav=document.createElement('div');nav.id='fenix-v111-week-nav';
+       nav.innerHTML='<button type="button" data-fenix-week-step="-7" aria-label="Semana anterior">‹</button>'+
+         '<div class="fenix-v111-range">'+esc(pretty(start)+' – '+pretty(end))+'<div><button type="button" class="fenix-v111-today" data-fenix-week-current="1">Esta semana</button></div></div>'+
+         '<button type="button" data-fenix-week-step="7" aria-label="Semana siguiente">›</button>';
+       panel.insertBefore(nav,panel.querySelector('h2')?.nextSibling||panel.firstChild);
+     }
+   }
+   if(tab==='Hoy'){
+     const events=[];
+     for(let i=0;i<7;i++){
+       const d=datePlus(dateFor(today),i),key=iso(d);
+       familyEvents(key).forEach(f=>events.push({date:key,entry:f}));
+     }
+     if(events.length){
+       const panel=document.createElement('section');panel.className='panel';panel.id='fenix-v111-special';
+       panel.innerHTML='<h3>🌸 Próximas fechas especiales</h3>'+events.map(({date,entry})=>
+         '<p>'+esc(entry.type==='cumple'?'🎂':'🌸')+' <strong>'+esc(dateFor(date).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'}))+'</strong> · '+esc(entry.title)+'</p>').join('');
+       view.insertBefore(panel,view.firstChild);
+     }
+   }
+ };
+ document.addEventListener('click',function(event){
+   const step=event.target.closest('[data-fenix-week-step]');
+   const current=event.target.closest('[data-fenix-week-current]');
+   if(!step&&!current)return;
+   event.preventDefault();event.stopPropagation();
+   if(current){selected=today;}
+   else {const d=dateFor(selected);d.setDate(d.getDate()+Number(step.dataset.fenixWeekStep));selected=iso(d);}
+   tab='Semana';render();
+ },true);
  render();
 })();
 </script>
