@@ -1630,6 +1630,49 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
+
+<script id="fenix-v100-duplicate-guard">
+/* V100: validación en las DOS vías de creación (planificador y ficha). */
+(function(){
+'use strict';
+const norm = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+const existing = (name,exceptId) => state.tasks.find(t=>t.kind==='rutina'&&String(t.id)!==String(exceptId||'')&&norm(t.name)===norm(name));
+function warn(name, match){
+ const edit=confirm('Esta rutina ya existe: «'+match.name+'».\n\nPulsa Aceptar para editar la existente, o Cancelar para volver sin crear otra copia.');
+ if(edit){document.getElementById('fenix-planner-dialog')?.close();document.getElementById('editor')?.close();openEditor(match.id);}
+}
+document.addEventListener('click',function(e){
+ const button=e.target.closest('[data-save-planner]');
+ if(!button)return;
+ const dlg=document.getElementById('fenix-planner-dialog');
+ if(!dlg?.open)return;
+ const names=[
+  ...[...dlg.querySelectorAll('[data-plan-check]:checked')].map(input=>(FENIX_CATALOG[Number(input.dataset.planCheck)]||[])[0]),
+  ...[...dlg.querySelectorAll('[data-custom-name]')].map(input=>input.value.trim()).filter(Boolean)
+ ];
+ const seen=new Map();
+ for(const name of names){
+  if(!name)continue;
+  const match=existing(name);
+  if(match){e.preventDefault();e.stopImmediatePropagation();warn(name,match);return;}
+  if(seen.has(norm(name))){
+   e.preventDefault();e.stopImmediatePropagation();
+   alert('Has seleccionado dos veces «'+name+'». Deja una sola antes de guardar.');
+   return;
+  }
+  seen.set(norm(name),true);
+ }
+},true);
+document.getElementById('form')?.addEventListener('submit',function(e){
+ const kind=document.getElementById('kind')?.value;
+ if(kind!=='rutina')return;
+ const name=document.getElementById('name')?.value||'';
+ const id=document.getElementById('id')?.value||'';
+ const match=existing(name,id);
+ if(match){e.preventDefault();e.stopImmediatePropagation();warn(name,match);}
+},true);
+})();
+</script>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
