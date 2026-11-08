@@ -1699,6 +1699,25 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
 
+<style id="fenix-v118-print-fix">
+#fenix-hb-print-sheet{display:none}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ html,body{width:auto!important;height:auto!important;max-width:none!important;overflow:visible!important;background:#fff!important}
+ body.fenix-hb-print-sheet-active>*:not(#fenix-hb-print-sheet){display:none!important}
+ body.fenix-hb-print-sheet-active #fenix-hb-print-sheet{display:block!important;position:static!important;visibility:visible!important;width:100%!important;max-width:none!important;overflow:visible!important;color:#222!important;font:11pt Arial,sans-serif!important}
+ #fenix-hb-print-sheet h1{font-size:17pt;margin:0 0 12pt}
+ #fenix-hb-print-sheet section{display:block!important;position:static!important;overflow:visible!important;max-width:none!important;width:100%!important;border:0!important;padding:0!important;margin:0!important;background:#fff!important}
+ #fenix-hb-print-sheet .hb-board{width:100%!important;table-layout:fixed!important;border-spacing:3px 6px!important}
+ #fenix-hb-print-sheet .hb-board th:first-child{width:34%!important}
+ #fenix-hb-print-sheet .hb-board td,#fenix-hb-print-sheet .hb-board th{font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-cell{border:1px solid #aaa!important;background:#fff!important;color:#222!important;min-height:25px!important}
+ #fenix-hb-print-sheet .hb-stats{width:100%!important;font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-stats th,#fenix-hb-print-sheet .hb-stats td{padding:7px 5px!important;border-bottom:1px solid #ddd!important}
+ #fenix-hb-print-sheet tr{break-inside:avoid}
+ #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
+}
+</style>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -1747,6 +1766,25 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
 #fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:nowrap;gap:3px}
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
+</style>
+<style id="fenix-v118-print-fix">
+#fenix-hb-print-sheet{display:none}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ html,body{width:auto!important;height:auto!important;max-width:none!important;overflow:visible!important;background:#fff!important}
+ body.fenix-hb-print-sheet-active>*:not(#fenix-hb-print-sheet){display:none!important}
+ body.fenix-hb-print-sheet-active #fenix-hb-print-sheet{display:block!important;position:static!important;visibility:visible!important;width:100%!important;max-width:none!important;overflow:visible!important;color:#222!important;font:11pt Arial,sans-serif!important}
+ #fenix-hb-print-sheet h1{font-size:17pt;margin:0 0 12pt}
+ #fenix-hb-print-sheet section{display:block!important;position:static!important;overflow:visible!important;max-width:none!important;width:100%!important;border:0!important;padding:0!important;margin:0!important;background:#fff!important}
+ #fenix-hb-print-sheet .hb-board{width:100%!important;table-layout:fixed!important;border-spacing:3px 6px!important}
+ #fenix-hb-print-sheet .hb-board th:first-child{width:34%!important}
+ #fenix-hb-print-sheet .hb-board td,#fenix-hb-print-sheet .hb-board th{font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-cell{border:1px solid #aaa!important;background:#fff!important;color:#222!important;min-height:25px!important}
+ #fenix-hb-print-sheet .hb-stats{width:100%!important;font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-stats th,#fenix-hb-print-sheet .hb-stats td{padding:7px 5px!important;border-bottom:1px solid #ddd!important}
+ #fenix-hb-print-sheet tr{break-inside:avoid}
+ #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
+}
 </style>
 </body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
@@ -2759,8 +2797,27 @@ html,body{max-width:100%;overflow-x:hidden}#fenix-habit-tracker{min-width:0;max-
  function dialog(id){editId=id;const t=tracker(),h=id?t.habits.find(x=>x.id===id):null;const host=document.getElementById('hb-dialog');if(!host)return;host.innerHTML='<div class="hb-modal-backdrop"><form class="hb-modal" id="hb-form"><h3>'+(h?'Editar hábito':'Añadir hábito')+'</h3><label class="hb-field" for="hb-name">Nombre del hábito</label><input id="hb-name" type="text" maxlength="80" required value="'+escapeHB(h?.name||'')+'"><label class="hb-field">Días habituales</label><div class="hb-daychoices">'+days.map((d,i)=>'<label>'+d+'<input type="checkbox" name="hb-day" value="'+((i+1)%7)+'" '+((h?.days||[]).includes((i+1)%7)?'checked':'')+'></label>').join('')+'</div><label class="hb-field" for="hb-interval">Repetir cada cuántas semanas</label><input id="hb-interval" type="number" min="1" max="52" value="'+(h?.interval||1)+'"><label class="hb-field" for="hb-notes">Nota (opcional)</label><input id="hb-notes" type="text" maxlength="160" value="'+escapeHB(h?.notes||'')+'"><label class="hb-field"><input id="hb-active" type="checkbox" '+(h?.active?'checked':!h?'checked':'')+'> Hábito activo</label><div class="hb-actions"><button class="primary" type="submit">Guardar</button><button type="button" data-hb-cancel="1">Cancelar</button>'+(h?'<button type="button" data-hb-delete="1">Quitar hábito</button>':'')+'</div></form></div>';document.getElementById('hb-name').focus()}
  function updateSchedule(h,changes){h.history||=[];const date=now();h.history=h.history.filter(x=>x.effective!==date);h.history.push({effective:date,...changes});Object.assign(h,changes)}
  document.addEventListener('submit',e=>{if(e.target.id!=='hb-form')return;e.preventDefault();const t=tracker(),name=document.getElementById('hb-name').value.trim(),interval=Number(document.getElementById('hb-interval').value),daysPicked=[...document.querySelectorAll('input[name="hb-day"]:checked')].map(x=>Number(x.value)),active=document.getElementById('hb-active').checked,notes=document.getElementById('hb-notes').value.trim();if(!name||!Number.isInteger(interval)||interval<1||interval>52)return;let h=t.habits.find(x=>x.id===editId);if(h){h.name=name;h.notes=notes;updateSchedule(h,{days:daysPicked,active,interval})}else{h={id:'personal-'+Date.now()+'-'+Math.floor(Math.random()*10000),name,notes,days:daysPicked,active,interval,from:now(),anchor:now(),history:[]};t.habits.push(h)}save();render()});
- document.addEventListener('click',e=>{const b=e.target.closest('[data-hb-view],[data-hb-move],[data-hb-now],[data-hb-add],[data-hb-edit],[data-hb-cancel],[data-hb-delete],[data-hb-mode],[data-hb-cell],[data-hb-print]');if(!b)return;const t=tracker();if(b.hasAttribute('data-hb-view')){t.view=b.dataset.hbView;save();render()}else if(b.hasAttribute('data-hb-move')){const n=Number(b.dataset.hbMove);t.cursor=t.view==='week'?addDays(t.cursor,n*7):iso(new Date(+t.cursor.slice(0,4),+t.cursor.slice(5,7)-1+n,1));save();render()}else if(b.hasAttribute('data-hb-now')){t.cursor=now();save();render()}else if(b.hasAttribute('data-hb-mode')){mode=b.dataset.hbMode;render()}else if(b.hasAttribute('data-hb-add'))dialog(null);else if(b.hasAttribute('data-hb-edit'))dialog(b.dataset.hbEdit);else if(b.hasAttribute('data-hb-cancel'))render();else if(b.hasAttribute('data-hb-delete')){const h=t.habits.find(x=>x.id===editId);if(h&&confirm('¿Quitar «'+h.name+'» de la lista? Se conservará su historial.')){h.deleted=true;save();render()}}else if(b.hasAttribute('data-hb-cell')){const h=t.habits.find(x=>x.id===b.dataset.hbCell),d=b.dataset.hbDate;if(!h)return;const key=h.id+'@'+d;if(mode==='plan'){const weekday=parse(d).getDay(),set=new Set(h.days||[]);if(set.has(weekday))set.delete(weekday);else set.add(weekday);updateSchedule(h,{days:[...set].sort(),active:true});save();render();return}if(d>now())return;const current=t.done[key]||'';t.done[key]=current==='done'?'skip':current==='skip'?'':'done';if(!t.done[key])delete t.done[key];save();render()}else if(b.hasAttribute('data-hb-print')){document.body.classList.add('fenix-hb-printing');window.print();setTimeout(()=>document.body.classList.remove('fenix-hb-printing'),1200)}});
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-hb-view],[data-hb-move],[data-hb-now],[data-hb-add],[data-hb-edit],[data-hb-cancel],[data-hb-delete],[data-hb-mode],[data-hb-cell],[data-hb-print]');if(!b)return;const t=tracker();if(b.hasAttribute('data-hb-view')){t.view=b.dataset.hbView;save();render()}else if(b.hasAttribute('data-hb-move')){const n=Number(b.dataset.hbMove);t.cursor=t.view==='week'?addDays(t.cursor,n*7):iso(new Date(+t.cursor.slice(0,4),+t.cursor.slice(5,7)-1+n,1));save();render()}else if(b.hasAttribute('data-hb-now')){t.cursor=now();save();render()}else if(b.hasAttribute('data-hb-mode')){mode=b.dataset.hbMode;render()}else if(b.hasAttribute('data-hb-add'))dialog(null);else if(b.hasAttribute('data-hb-edit'))dialog(b.dataset.hbEdit);else if(b.hasAttribute('data-hb-cancel'))render();else if(b.hasAttribute('data-hb-delete')){const h=t.habits.find(x=>x.id===editId);if(h&&confirm('¿Quitar «'+h.name+'» de la lista? Se conservará su historial.')){h.deleted=true;save();render()}}else if(b.hasAttribute('data-hb-cell')){const h=t.habits.find(x=>x.id===b.dataset.hbCell),d=b.dataset.hbDate;if(!h)return;const key=h.id+'@'+d;if(mode==='plan'){const weekday=parse(d).getDay(),set=new Set(h.days||[]);if(set.has(weekday))set.delete(weekday);else set.add(weekday);updateSchedule(h,{days:[...set].sort(),active:true});save();render();return}if(d>now())return;const current=t.done[key]||'';t.done[key]=current==='done'?'skip':current==='skip'?'':'done';if(!t.done[key])delete t.done[key];save();render()}else if(b.hasAttribute('data-hb-print')){(()=>{const source=document.getElementById('fenix-habit-tracker');if(!source)return;document.getElementById('fenix-hb-print-sheet')?.remove();const sheet=document.createElement('div');sheet.id='fenix-hb-print-sheet';const copy=source.cloneNode(true);copy.removeAttribute('id');copy.querySelectorAll('button,.hb-actions,.hb-modal-backdrop,#hb-dialog,.hb-legend').forEach(el=>el.remove());const heading=document.createElement('h1');heading.textContent='FÉNIX · Mis hábitos y cuidados';sheet.appendChild(heading);sheet.appendChild(copy);document.body.appendChild(sheet);document.body.classList.add('fenix-hb-print-sheet-active');const clean=()=>{document.body.classList.remove('fenix-hb-print-sheet-active');sheet.remove();window.removeEventListener('afterprint',clean)};window.addEventListener('afterprint',clean);requestAnimationFrame(()=>requestAnimationFrame(()=>{window.print();setTimeout(clean,60000)}))})()}});
  render();
 })();
 </script>
+<style id="fenix-v118-print-fix">
+#fenix-hb-print-sheet{display:none}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ html,body{width:auto!important;height:auto!important;max-width:none!important;overflow:visible!important;background:#fff!important}
+ body.fenix-hb-print-sheet-active>*:not(#fenix-hb-print-sheet){display:none!important}
+ body.fenix-hb-print-sheet-active #fenix-hb-print-sheet{display:block!important;position:static!important;visibility:visible!important;width:100%!important;max-width:none!important;overflow:visible!important;color:#222!important;font:11pt Arial,sans-serif!important}
+ #fenix-hb-print-sheet h1{font-size:17pt;margin:0 0 12pt}
+ #fenix-hb-print-sheet section{display:block!important;position:static!important;overflow:visible!important;max-width:none!important;width:100%!important;border:0!important;padding:0!important;margin:0!important;background:#fff!important}
+ #fenix-hb-print-sheet .hb-board{width:100%!important;table-layout:fixed!important;border-spacing:3px 6px!important}
+ #fenix-hb-print-sheet .hb-board th:first-child{width:34%!important}
+ #fenix-hb-print-sheet .hb-board td,#fenix-hb-print-sheet .hb-board th{font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-cell{border:1px solid #aaa!important;background:#fff!important;color:#222!important;min-height:25px!important}
+ #fenix-hb-print-sheet .hb-stats{width:100%!important;font-size:10pt!important}
+ #fenix-hb-print-sheet .hb-stats th,#fenix-hb-print-sheet .hb-stats td{padding:7px 5px!important;border-bottom:1px solid #ddd!important}
+ #fenix-hb-print-sheet tr{break-inside:avoid}
+ #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
+}
+</style>
 </body></html>
