@@ -2730,4 +2730,59 @@ document.addEventListener('click',function(event){
  render();
 })();
 </script>
+
+<style id="fenix-v116-style">
+#fenix-habit-tracker{border:1px solid #c8ddce;background:#f8fcf9;border-radius:14px;padding:15px;margin:12px 0}#fenix-habit-tracker h2{margin:0 0 8px;color:#28543c}#fenix-habit-tracker .hb-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}#fenix-habit-tracker button{border:1px solid #bcd3c3;background:white;color:#28543c;border-radius:9px;padding:8px;font-size:13px}#fenix-habit-tracker button.active{background:#dcefe1;font-weight:700}#fenix-habit-tracker .hb-row{padding:9px 0;border-bottom:1px solid #e0e9e2}#fenix-habit-tracker .hb-row:last-child{border-bottom:0}#fenix-habit-tracker .hb-head{display:flex;justify-content:space-between;gap:6px;align-items:center}#fenix-habit-tracker .hb-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:7px}#fenix-habit-tracker .hb-grid label{text-align:center;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}#fenix-habit-tracker input[type=checkbox]{width:21px;height:21px;accent-color:#42785a}#fenix-habit-tracker .hb-muted{color:#697a70;font-size:12px}#fenix-habit-tracker .hb-month{display:flex;gap:7px;align-items:center;flex-wrap:wrap}#fenix-habit-tracker .hb-month input{max-width:150px}#fenix-habit-tracker .hb-print{background:#e4f2e8}#fenix-habit-tracker .hb-stats{width:100%;border-collapse:collapse;font-size:12px}#fenix-habit-tracker .hb-stats td,#fenix-habit-tracker .hb-stats th{padding:7px 3px;border-bottom:1px solid #dce7de;text-align:left}#fenix-habit-tracker .hb-stats td:not(:first-child),#fenix-habit-tracker .hb-stats th:not(:first-child){text-align:right}#fenix-habit-tracker .hb-pause{opacity:.65}#fenix-habit-tracker .hb-legend{font-size:12px;color:#64776a}
+@media print{body.fenix-hb-printing body{background:white}body.fenix-hb-printing header,body.fenix-hb-printing nav,body.fenix-hb-printing .tabs,body.fenix-hb-printing .section-menu,body.fenix-hb-printing .searchbar,body.fenix-hb-printing #view>*:not(#fenix-habit-tracker),body.fenix-hb-printing #fenix-habit-tracker .hb-actions,body.fenix-hb-printing #fenix-habit-tracker .hb-edit,body.fenix-hb-printing #fenix-habit-tracker .hb-month input{display:none!important}body.fenix-hb-printing #fenix-habit-tracker{border:0;background:white}body.fenix-hb-printing #fenix-habit-tracker .hb-print{display:none!important}}
+</style>
+<script id="fenix-v116-habits">
+/* V116: seguimiento unificado, separado de la agenda de ejercicio y conservado dentro de fenix-v1. */
+(function(){'use strict';
+ const todayHB=()=>iso(new Date());const dayNames=['D','L','M','X','J','V','S'];
+ const initial=[
+  ['gua-facial','🌙 Gua sha facial',[1,4],true,'5–10 minutos'],
+  ['gua-corporal','🚿 Gua sha corporal',[2,5],true,'10–15 minutos'],
+  ['kinesio','🌸 Kinesio facial',[3],true,'Según tolerancia de la piel'],
+  ['meditacion','🧘 Meditación o respiración',[1,3,5],true,'Sin presión por cumplir'],
+  ['pedicura','🦶 Pedicura FÉNIX',[6],true,'Cada dos semanas'],
+  ['paseo','🚶 Paseo suave',[3],false,'Opcional, según te encuentres'],
+  ['dermaroller','🌿 Dermaroller facial',[0],false,'Activación manual desde diciembre; confirmar pauta segura']
+ ];
+ function tracker(){
+  if(!state.habitTracker||!Array.isArray(state.habitTracker.habits)){
+   state.habitTracker={version:1,habits:initial.map(([id,name,days,active,notes])=>({id,name,days,active,notes,interval:id==='pedicura'?2:1,anchor:'2026-11-14',from:id==='dermaroller'?'2026-12-01':'2026-11-09',history:[]})),done:{},view:'week',cursor:todayHB()};save();
+  }
+  state.habitTracker.done ||= {};return state.habitTracker;
+ }
+ const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const dateAdd=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+ const weekStart=s=>{const d=parse(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return iso(d)};
+ const weeksApart=(a,b)=>Math.floor((parse(b)-parse(a))/604800000);
+ function settingsAt(h,d){let result={days:h.days,active:h.active,interval:h.interval||1,from:h.from||'2026-11-09',anchor:h.anchor||'2026-11-14'};for(const change of (h.history||[]).filter(x=>x.effective<=d).sort((a,b)=>a.effective.localeCompare(b.effective)))result={...result,...change};return result;}
+ function scheduled(h,d){const v=settingsAt(h,d);if(!v.active||d<v.from||!v.days.includes(parse(d).getDay()))return false;if(v.interval>1&&weeksApart(weekStart(v.anchor),weekStart(d))%v.interval!==0)return false;return true;}
+ function status(h,d){return tracker().done[h.id+'@'+d]||'';}
+ function count(h,start,end){let planned=0,done=0,skipped=0;for(let d=start;d<=end;d=dateAdd(d,1)){if(!scheduled(h,d)||d>todayHB())continue;planned++;if(status(h,d)==='done')done++;if(status(h,d)==='skip')skipped++;}return {planned,done,skipped,pending:planned-done-skipped};}
+ function range(){const t=tracker(),s=t.view==='week'?weekStart(t.cursor):t.cursor.slice(0,7)+'-01';const e=t.view==='week'?dateAdd(s,6):iso(new Date(Number(s.slice(0,4)),Number(s.slice(5,7)),0));return [s,e];}
+ function paint(){const t=tracker(),[start,end]=range(),dates=[];for(let d=start;d<=end;d=dateAdd(d,1))dates.push(d);const week=t.view==='week';const title=week?`${start} — ${end}`:parse(start).toLocaleDateString('es-ES',{month:'long',year:'numeric'});let html=`<section id="fenix-habit-tracker"><h2>🌿 Mis hábitos y cuidados</h2><p class="hb-muted">Un único seguimiento. Marca lo que hagas, cambia las frecuencias cuando quieras y conserva el historial.</p><div class="hb-actions"><button data-hb-view="week" class="${week?'active':''}">Semana</button><button data-hb-view="month" class="${!week?'active':''}">Mes</button><button data-hb-move="-1">‹ Anterior</button><button data-hb-move="1">Siguiente ›</button><button data-hb-now="1">Actual</button></div><strong>${safe(title)}</strong>`;
+ if(week){for(const h of t.habits){const visible=dates.filter(d=>scheduled(h,d));html+=`<div class="hb-row"><div class="hb-head"><span><strong>${safe(h.name)}</strong><br><small class="hb-muted">${safe(h.notes||'')}</small></span><button class="hb-edit" data-hb-edit="${safe(h.id)}">Editar</button></div>`;if(!visible.length)html+='<p class="hb-muted">Sin sesiones programadas esta semana.</p>';else html+='<div class="hb-grid">'+dates.map(d=>{if(!scheduled(h,d))return '<span></span>';const v=status(h,d);return `<label>${dayNames[parse(d).getDay()]} ${Number(d.slice(-2))}<input type="checkbox" data-hb-check="${safe(h.id)}" data-hb-date="${d}" ${v==='done'?'checked':''} ${d>todayHB()?'disabled':''} aria-label="${safe(h.name)} ${d}"></label>`;}).join('')+'</div>';html+='</div>';}}
+ else {html+='<p class="hb-legend">Se cuentan solo los días programados hasta hoy. Una sesión sin marcar queda pendiente; puedes indicar «No realizada» desde el editor de registros.</p><table class="hb-stats"><thead><tr><th>Hábito</th><th>Prev.</th><th>Hechas</th><th>No realizadas</th><th>Pend.</th></tr></thead><tbody>';for(const h of t.habits){const c=count(h,start,end);html+=`<tr><td>${safe(h.name)} <button class="hb-edit" data-hb-edit="${safe(h.id)}">✎</button></td><td>${c.planned}</td><td>${c.done}</td><td>${c.skipped}</td><td>${c.pending}</td></tr>`;}html+='</tbody></table><p class="hb-muted">Para marcar un día concreto, abre la semana correspondiente.</p>';}
+ html+=`<div class="hb-actions"><button data-hb-add="1">+ Añadir hábito</button><button data-hb-print="1" class="hb-print">🖨 Imprimir ${week?'semana':'mes'}</button></div><p class="hb-legend">El dermaroller está creado pero desactivado; actívalo tú cuando decidas. Consulta una pauta segura antes de usarlo.</p></section>`;return html;
+ }
+ function decorate(){if(tab!=='Rutinas'||searchText)return;const v=document.getElementById('view');if(!v)return;v.querySelector('#fenix-habit-tracker')?.remove();v.insertAdjacentHTML('afterbegin',paint());/* El listado anterior queda accesible, pero no se confunde con el nuevo registro. */const legacy=[...v.querySelectorAll('section.panel')].find(x=>x.querySelector('h2')?.textContent.trim()==='Mis hábitos y cuidados');if(legacy){legacy.style.display='none';}}
+ const previous=render;render=function(){previous();decorate();};
+ document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-hb-view],[data-hb-move],[data-hb-now],[data-hb-edit],[data-hb-add],[data-hb-print]');if(!b)return;const t=tracker();
+  if(b.hasAttribute('data-hb-view')){t.view=b.dataset.hbView;save();render();}
+  else if(b.hasAttribute('data-hb-move')){const n=Number(b.dataset.hbMove);t.cursor=t.view==='week'?dateAdd(t.cursor,n*7):iso(new Date(Number(t.cursor.slice(0,4)),Number(t.cursor.slice(5,7))-1+n,1));save();render();}
+  else if(b.hasAttribute('data-hb-now')){t.cursor=todayHB();save();render();}
+  else if(b.hasAttribute('data-hb-print')){document.body.classList.add('fenix-hb-printing');window.print();setTimeout(()=>document.body.classList.remove('fenix-hb-printing'),1000);}
+  else if(b.hasAttribute('data-hb-add')){const name=prompt('Nombre del nuevo hábito:');if(!name?.trim())return;t.habits.push({id:'personal-'+Date.now(),name:name.trim(),days:[],active:false,notes:'',interval:1,from:todayHB(),anchor:todayHB(),history:[]});save();render();}
+  else if(b.hasAttribute('data-hb-edit')){const h=t.habits.find(x=>x.id===b.dataset.hbEdit);if(!h)return;const name=prompt('Nombre del hábito:',h.name);if(name===null)return;const days=prompt('Días de la semana (1=lunes ... 6=sábado, 0=domingo), separados por comas. Vacío = ninguno:',h.days.join(','));if(days===null)return;const parsed=days.trim()?days.split(',').map(x=>Number(x.trim())):[];if(parsed.some(x=>!Number.isInteger(x)||x<0||x>6)||new Set(parsed).size!==parsed.length){alert('Introduce días válidos entre 0 y 6, sin repetir.');return;}const active=confirm('¿Quieres que este hábito esté ACTIVO desde hoy?\nAceptar = activo. Cancelar = pausado.');const interval=prompt('¿Cada cuántas semanas? (1 = todas, 2 = quincenal)',String(h.interval||1));if(interval===null)return;const n=Number(interval);if(!Number.isInteger(n)||n<1||n>52){alert('Frecuencia no válida.');return;}const notes=prompt('Nota opcional:',h.notes||'');if(notes===null)return;h.history||=[];h.history.push({effective:todayHB(),days:parsed,active,interval:n,from:h.from||todayHB(),anchor:h.anchor||todayHB()});h.name=name.trim()||h.name;h.days=parsed;h.active=active;h.interval=n;h.notes=notes;save();render();}
+ });
+ document.addEventListener('change',e=>{const c=e.target.closest('[data-hb-check]');if(!c)return;const t=tracker(),key=c.dataset.hbCheck+'@'+c.dataset.hbDate;if(c.checked)t.done[key]='done';else delete t.done[key];save();render();});
+ /* Desde la vista mensual se pueden clasificar las ausencias sin confundirlas con sesiones futuras. */
+ document.addEventListener('contextmenu',e=>{const c=e.target.closest('[data-hb-check]');if(!c||c.dataset.hbDate>todayHB())return;e.preventDefault();const t=tracker(),key=c.dataset.hbCheck+'@'+c.dataset.hbDate;t.done[key]='skip';save();render();});
+ render();
+})();
+</script>
 </body></html>
