@@ -1625,6 +1625,11 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v91-home .v92-actions button{border:1px solid #cadfd0;background:#fff;color:#28543c;border-radius:9px;padding:9px 10px;font-size:13px;flex:1 1 auto;min-width:88px}
 </style>
 
+<style id="fenix-v99-compact-actions">
+#fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:nowrap;gap:3px}
+#fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
+#fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
+</style>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -1669,6 +1674,11 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
 #fenix-v91-home .v92-actions button{border:1px solid #cadfd0;background:#fff;color:#28543c;border-radius:9px;padding:9px 10px;font-size:13px;flex:1 1 auto;min-width:88px}
 </style>
 
+<style id="fenix-v99-compact-actions">
+#fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:nowrap;gap:3px}
+#fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
+#fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
+</style>
 </body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
 </script>
@@ -1947,7 +1957,7 @@ const startWeek=()=>{const d=parse(selected||today);d.setDate(d.getDate()-(d.get
 const weekDates=()=>{const d=startWeek();return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()+i);return iso(x)})};
 const routines=()=>state.tasks.filter(t=>t.kind==='rutina' && !/^Recordatorio (personal|del mediodía|de la mañana|de la cena)/i.test(t.name||'')).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
 const planned=(t,d)=>occurs(t,d);
-const weekRows=()=>{const dates=weekDates();return routines().filter(t=>dates.some(d=>planned(t,d))||mode==='plan').map(t=>({t,dates}));};
+const weekRows=()=>{const dates=weekDates();return routines().map(t=>({t,dates}));};
 function draw(){const section=document.getElementById('fenix-v72-routines');if(!section||tab!=='Hoy'||searchText)return;
  const dates=weekDates(),rows=weekRows(),n=dates.reduce((sum,d)=>sum+rows.filter(r=>planned(r.t,d)).length,0),done=dates.reduce((sum,d)=>sum+rows.filter(r=>planned(r.t,d)&&state.done[r.t.id+'@'+d]).length,0);
  const dayLabels=['L','M','X','J','V','S','D'];
@@ -2277,29 +2287,38 @@ render();
 })();
 </script>
 
-<style id="fenix-v98-style">
+<style id="fenix-v99-style">
 #fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 #fenix-v72-routines .fw-name .v98-actions button{font-size:11px;padding:5px 7px;border:1px solid #c6d9cb;border-radius:7px;background:#fff;color:#28543c}
 #fenix-v72-routines .fw-name .v98-actions .v98-delete{color:#8b3535;border-color:#e0c7c7}
 </style>
-<script id="fenix-v98-routine-management">
+<script id="fenix-v99-routine-management">
 (function(){'use strict';
  const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
  const findDuplicate=(name,id)=>state.tasks.find(t=>t.kind==='rutina'&&String(t.id)!==String(id||'')&&normalize(t.name)===normalize(name));
- // Interceptar únicamente el guardado de rutinas, antes del controlador existente.
+ // Comprobar duplicados justo antes del guardado original, en el mismo formulario.
+ // El formulario principal usa onsubmit; envolverlo evita que otros listeners
+ // de captura o pantallas alternativas eludan la comprobación.
  const form=document.getElementById('form');
- if(form)form.addEventListener('submit',function(e){
-   const kind=document.getElementById('kind')?.value;
-   if(kind!=='rutina')return;
-   const name=document.getElementById('name')?.value||'';
-   const id=document.getElementById('id')?.value||'';
-   const dup=findDuplicate(name,id);
-   if(!dup)return;
-   e.preventDefault();e.stopImmediatePropagation();
-   if(confirm('Ya existe la rutina «'+dup.name+'».\n\nAceptar: editar la rutina existente.\nCancelar: volver sin crear un duplicado.')){
-     document.getElementById('editor')?.close();openEditor(dup.id);
-   }
- },true);
+ if(form){
+   const originalSave=form.onsubmit;
+   form.onsubmit=function(e){
+     const kind=document.getElementById('kind')?.value;
+     if(kind==='rutina'){
+       const name=document.getElementById('name')?.value||'';
+       const id=document.getElementById('id')?.value||'';
+       const dup=findDuplicate(name,id);
+       if(dup){
+         e.preventDefault();
+         if(confirm('Ya existe la rutina «'+dup.name+'».\n\nAceptar: editar la existente.\nCancelar: mantener este formulario sin crear una copia.')){
+           document.getElementById('editor')?.close();openEditor(dup.id);
+         }
+         return false;
+       }
+     }
+     return originalSave?.call(this,e);
+   };
+ }
  // El listado semanal utiliza las rutinas reales. Las acciones no crean copias.
  function decorate(){
   document.querySelectorAll('#fenix-v72-routines tbody tr').forEach(row=>{
@@ -2343,4 +2362,9 @@ render();
  },true);
 })();
 </script>
+<style id="fenix-v99-compact-actions">
+#fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:nowrap;gap:3px}
+#fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
+#fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
+</style>
 </body></html>
