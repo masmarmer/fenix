@@ -1200,11 +1200,29 @@ async function fenixGoogleCalendars(){
   fenixGoogleStatus('El calendario guardado no está disponible. Selecciona el correcto antes de sincronizar.');
  }
 }
-function fenixGoogleEvent(f){const yearly=!!f.yearly&&f.type!=='padre';const title=f.title;const description=(f.notes||'')+'\nCreado desde FÉNIX';let e={summary:title,description,transparency:(f.type==='padre'?'opaque':'transparent')};if(f.type==='padre'){
- const start=f.start+'T'+(f.startTime||'10:00')+':00',end=(f.end||f.start)+'T'+(f.endTime||'21:00')+':00';e.start={dateTime:fenixLocalGoogleDateTime(f.start,f.startTime||'10:00')};e.end={dateTime:fenixLocalGoogleDateTime(f.end||f.start,f.endTime||'21:00')};
- }else if(f.time){e.start={dateTime:fenixLocalGoogleDateTime(f.start,f.time)};const d=new Date(f.start+'T'+f.time+':00');d.setHours(d.getHours()+1);const end=iso(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':00';e.end={dateTime:fenixLocalGoogleEnd(f.start,f.time,60)};
- }else{e.start={date:f.start};e.end={date:fenixPlusDays(f.start,1)}}
- if(yearly)e.recurrence=['RRULE:FREQ=YEARLY'];e.reminders={useDefault:false,overrides:f.type==='padre'?[{method:'popup',minutes:60}]:[{method:'popup',minutes:1440}]};e.extendedProperties={private:{fenixId:f.id}};return e}
+function fenixGoogleEvent(f){
+ const yearly=!!f.yearly&&f.type!=='padre';
+ const e={summary:f.title,description:(f.notes||'')+'\nCreado desde FÉNIX',transparency:f.type==='padre'?'opaque':'transparent'};
+ if(f.type==='padre'){
+  e.start={dateTime:fenixLocalGoogleDateTime(f.start,f.startTime||'10:00')};
+  e.end={dateTime:fenixLocalGoogleDateTime(f.end||f.start,f.endTime||'21:00')};
+ }else if(f.type==='cumple'||f.type==='santo'){
+  // A las 09:00: aviso 24 horas antes y al comenzar, incluso en fechas anuales.
+  const time=f.time||'09:00';
+  e.start={dateTime:fenixLocalGoogleDateTime(f.start,time)};
+  e.end={dateTime:fenixLocalGoogleEnd(f.start,time,15)};
+ }else if(f.time){
+  e.start={dateTime:fenixLocalGoogleDateTime(f.start,f.time)};
+  e.end={dateTime:fenixLocalGoogleEnd(f.start,f.time,60)};
+ }else{
+  e.start={date:f.start};e.end={date:fenixPlusDays(f.start,1)};
+ }
+ if(yearly)e.recurrence=['RRULE:FREQ=YEARLY'];
+ e.reminders={useDefault:false,overrides:f.type==='padre'?[{method:'popup',minutes:60}]:
+  (f.type==='cumple'||f.type==='santo')?[{method:'popup',minutes:1440},{method:'popup',minutes:0}]:[{method:'popup',minutes:1440}]};
+ e.extendedProperties={private:{fenixId:f.id}};
+ return e;
+}
 async function fenixGoogleSync(){if(!fenixGoogleCfg.calendarId||document.getElementById('fenix-google-cal')?.value===''){fenixGoogleStatus('Selecciona primero el calendario correcto. No se ha enviado nada.');return}if(fenixGoogleBusy)return;fenixGoogleBusy=true;try{
  const a=fenixFamily.filter(f=>f.start&&f.status==='Confirmado');if(!a.length){fenixGoogleStatus('No hay fechas familiares confirmadas para enviar.');return}
  if(!confirm(`¿Enviar o actualizar ${a.length} acontecimientos familiares confirmados en Google Calendar? Revisa que has seleccionado el calendario correcto.`))return;
