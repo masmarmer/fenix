@@ -1138,7 +1138,18 @@ function fenixGooglePanel(){
 }
 const fenixRenderBeforeV43=render;
 render=function(){fenixRenderBeforeV43();if(tab!=='Familia'||searchText)return;const v=document.getElementById('view');if(v&&!v.querySelector('#fenix-google-panel'))v.insertAdjacentHTML('beforeend',fenixGooglePanel())};
-function fenixGoogleStatus(s){const e=document.getElementById('fenix-google-status');if(e)e.textContent=s}
+function fenixGoogleStatus(s){
+ const e=document.getElementById('fenix-google-status');if(e)e.textContent=s;
+ const panel=document.getElementById('fenix-google-panel');if(!panel)return;
+ const connected=!!fenixGoogleToken;
+ const connect=panel.querySelector('[data-google-connect]');
+ const disconnect=panel.querySelector('[data-google-disconnect]');
+ if(connect){connect.hidden=connected;connect.disabled=connected;connect.textContent='Autorizar conexión con Google';}
+ if(disconnect){disconnect.hidden=!connected;disconnect.textContent='Cerrar conexión con Google';}
+ let indicator=panel.querySelector('#fenix-google-connection-indicator');
+ if(!indicator){indicator=document.createElement('p');indicator.id='fenix-google-connection-indicator';indicator.setAttribute('role','status');indicator.style.cssText='padding:12px 14px;border-radius:12px;font-weight:700;margin:10px 0;background:#eaf4ed;color:#24523c';const actions=panel.querySelector('.actions');if(actions)actions.insertAdjacentElement('beforebegin',indicator);}
+ if(indicator){indicator.textContent=connected?'✓ Google Calendar conectado · Destino: '+(fenixGoogleCfg.calendarName||fenixGoogleCfg.calendarId):'Google Calendar sin conectar';indicator.style.background=connected?'#eaf4ed':'#f3f1ed';indicator.style.color=connected?'#24523c':'#666';}
+}
 function fenixGoogleLoad(){return new Promise((resolve,reject)=>{if(window.google?.accounts?.oauth2)return resolve();const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=resolve;s.onerror=()=>reject(Error('No se pudo cargar la biblioteca de Google. Comprueba la conexión.'));document.head.appendChild(s)})}
 async function fenixGoogleConnect(){
  if(!location.protocol.startsWith('http'))throw Error('Abre FÉNIX desde su web HTTPS de GitHub Pages, no desde un archivo descargado.');
@@ -1347,6 +1358,7 @@ render=function(){
  }
  const status=p.querySelector('#fenix-google-status');
  if(status){status.classList.add('fenix-v47-state');status.insertAdjacentHTML('beforebegin',`<label class="fenix-v47-row"><input type="checkbox" id="fenix-v47-auto" ${fenixV47Auto?'checked':''}> Sincronizar automáticamente al guardar o editar (con FÉNIX abierto)</label><p class="subtle">Destino: ${esc(fenixGoogleCfg.calendarName||(fenixGoogleCfg.calendarId==='primary'?'Calendario principal de Google (sin verificar)':fenixGoogleCfg.calendarId))}. La eliminación de eventos vinculados exige conexión y confirmación; si Google falla, no se borran de FÉNIX.</p>`);if(!fenixV47Connected())status.textContent='Sin conectar. Tus cambios se guardan localmente.'}
+ fenixGoogleStatus(status?status.textContent:(fenixV47Connected()?'Conectado.':'Sin conectar.'));
  const oldWarning=Array.from(p.querySelectorAll('p.subtle')).find(x=>x.textContent.includes('No se borran automáticamente'));if(oldWarning)oldWarning.textContent='Se envían solo fechas familiares confirmadas. Las fechas provisionales o canceladas no se envían. Para borrar un evento vinculado se solicita confirmación y se elimina también su serie en Google. No se modifican otros eventos de Google.';
 };
 document.addEventListener('change',e=>{if(e.target.id==='fenix-v47-auto'){fenixV47Auto=e.target.checked;localStorage.setItem(FENIX_V47_AUTO,fenixV47Auto?'yes':'no');fenixGoogleStatus(fenixV47Auto?'Automatización activada para próximos guardados, mientras Google esté conectado.':'Automatización desactivada.')}});
