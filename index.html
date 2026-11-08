@@ -140,7 +140,7 @@ nav button{min-width:0}
 .fenix-plan-actions button{min-height:44px;font-size:13px;padding:7px 8px}
 .fenix-plan-add{margin-top:12px;width:100%}
 .fenix-custom-row{background:#f5f8f5;border-radius:10px;padding:12px;margin:10px 0}
-</style></head><body><header><small>PROYECTO FÉNIX</small><h1>Mi vida organizada 🌿</h1><span class="muted">Una agenda a tu ritmo</span></header><main><div class="tabs" id="tabs"></div><div class="section-menu"><label for="sectionpick">Secciones</label><select id="sectionpick" aria-label="Abrir sección"><option value="">Abrir una sección…</option><option value="Rutinas">Rutinas</option><option value="Hogar">Hogar</option><option value="Proyectos">Proyectos</option><option value="Bienestar">Bienestar y autocuidado</option><option value="Profesional">Vida profesional</option><option value="Creatividad">Proyectos creativos</option><option value="Gestiones">Finanzas y gestiones</option><option value="Ideas">Ideas sin fecha</option><option value="Familia">Vida personal y familia</option><option value="Ajustes">Ajustes</option></select></div><div class="searchbar"><input id="search" type="search" placeholder="🔎 Buscar tareas, citas, proyectos..." aria-label="Buscar en FÉNIX"><button id="searchclear" type="button">Limpiar</button></div><div id="view"></div><p class="foot">Tus actividades se guardan solo en este navegador. Algunos acontecimientos pueden sincronizarse con Google Calendar mientras FÉNIX esté abierto y conectado; no hay notificaciones automáticas con la aplicación cerrada. Haz copias de seguridad y protege los archivos exportados. No introduzcas información médica sensible hasta contar con protección adicional.</p></main><nav><button class="primary" id="add">＋ Añadir</button><button id="export">Exportar tareas (formato antiguo)</button><button id="import">Importar tareas (formato antiguo)</button><input class="hidden" type="file" accept="application/json,.json" id="file"></nav>
+</style><style id="fenix-v97-hide-source">script,style{display:none!important}</style></head><body><header><small>PROYECTO FÉNIX</small><h1>Mi vida organizada 🌿</h1><span class="muted">Una agenda a tu ritmo</span></header><main><div class="tabs" id="tabs"></div><div class="section-menu"><label for="sectionpick">Secciones</label><select id="sectionpick" aria-label="Abrir sección"><option value="">Abrir una sección…</option><option value="Rutinas">Rutinas</option><option value="Hogar">Hogar</option><option value="Proyectos">Proyectos</option><option value="Bienestar">Bienestar y autocuidado</option><option value="Profesional">Vida profesional</option><option value="Creatividad">Proyectos creativos</option><option value="Gestiones">Finanzas y gestiones</option><option value="Ideas">Ideas sin fecha</option><option value="Familia">Vida personal y familia</option><option value="Ajustes">Ajustes</option></select></div><div class="searchbar"><input id="search" type="search" placeholder="🔎 Buscar tareas, citas, proyectos..." aria-label="Buscar en FÉNIX"><button id="searchclear" type="button">Limpiar</button></div><div id="view"></div><p class="foot">Tus actividades se guardan solo en este navegador. Algunos acontecimientos pueden sincronizarse con Google Calendar mientras FÉNIX esté abierto y conectado; no hay notificaciones automáticas con la aplicación cerrada. Haz copias de seguridad y protege los archivos exportados. No introduzcas información médica sensible hasta contar con protección adicional.</p></main><nav><button class="primary" id="add">＋ Añadir</button><button id="export">Exportar tareas (formato antiguo)</button><button id="import">Importar tareas (formato antiguo)</button><input class="hidden" type="file" accept="application/json,.json" id="file"></nav>
 <dialog id="editor"><form id="form"><h2 id="formtitle">Nueva actividad</h2><input type="hidden" id="id"><div class="field"><label for="name">Actividad</label><input id="name" required maxlength="120" autocomplete="off"></div><div class="row"><div class="field"><label for="kind">Tipo</label><select id="kind"><option value="tarea">Tarea</option><option value="rutina">Rutina</option><option value="cita">Cita / evento</option><option value="proyecto">Proyecto</option></select></div><div class="field"><label for="category">Categoría</label><select id="category"><option>Hogar</option><option>Ejercicio</option><option>Autocuidado</option><option>Bienestar</option><option>Salud</option><option>Proyecto</option><option>Fecha especial</option><option>Trabajo / estudios</option><option>Otro</option></select></div></div><div id="appointment-fields" hidden><div class="row"><div class="field"><label for="appointmentType">Tipo de cita</label><select id="appointmentType"><option value="personal">Personal</option><option value="medica">Médica</option><option value="familiar">Familiar</option><option value="profesional">Profesional</option><option value="otra">Otra</option></select></div><div class="field"><label for="appointmentPerson">¿Para quién?</label><select id="appointmentPerson"><option value="yo">Yo</option><option value="pareja">Mi pareja</option><option value="otra">Otra persona</option></select></div></div><div class="field" id="appointment-person-name-field" hidden><label for="appointmentPersonName">Nombre (opcional)</label><input id="appointmentPersonName" maxlength="80" autocomplete="off"></div><div class="field"><label for="appointmentPlace">Lugar (opcional)</label><input id="appointmentPlace" maxlength="160" autocomplete="off"></div><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="appointmentBusy" checked style="width:auto"> Reservar este tiempo como ocupado en Google Calendar</label><small>Por defecto, las citas reservan su duración. Desmárcalo si no quieres bloquear ese horario. En una cita telefónica solo se reserva el tiempo indicado.</small><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="appointmentGoogle" style="width:auto"> Guardar también en Google Calendar</label><small>Opcional. Requiere conexión activa con Google. Las invitaciones se envían por separado, con confirmación. Para citas médicas, el título en Google será discreto: «Cita personal».</small><div id="fenix-invite-area" class="field" style="margin-top:10px"><label for="fenix-invite-email">Invitar por correo electrónico (opcional)</label><input id="fenix-invite-email" type="email" autocomplete="off" placeholder="persona@ejemplo.com" maxlength="254"><button type="button" id="fenix-send-invite" class="mini">Enviar invitación a esta cita</button><small>Primero guarda la cita en Google. El envío requiere confirmación y comparte fecha, hora, lugar y título del evento con la persona invitada.</small></div></div><div class="row"><div class="field"><label for="owner">Responsable</label><select id="owner"><option>Yo</option><option>Mi pareja</option><option>Ambos</option></select></div><div class="field"><label for="area">Zona (opcional)</label><select id="area"><option value="">Sin zona</option><option>Cocina</option><option>Office / desayunador</option><option>Office</option><option>Salón comedor</option><option>Aseo de abajo</option><option>Baño de arriba</option><option>Dormitorio principal</option><option>Habitación de invitados</option><option>Mi oficina</option><option>Oficina de mi pareja</option><option>Escaleras y pasillos</option><option>Patio trasero</option><option>Porche delantero</option><option>Jardín delantero</option><option>Porche y jardín delantero</option><option>Lavandería</option><option>Toda la casa</option></select></div></div><div class="row"><div class="field"><label for="date">Fecha inicial</label><input type="date" id="date" required></div><div class="field"><label for="time">Hora (opcional)</label><input type="time" id="time"></div></div><div class="row"><div class="field"><label for="repeat">Repetición</label><select id="repeat"><option value="none">Una vez</option><option value="daily">Cada día</option><option value="weekly">Cada semana</option><option value="weekdays">Días concretos de la semana</option><option value="biweekly">Cada 15 días (14 días)</option><option value="monthly">Cada mes</option><option value="bimonthly">Cada 2 meses</option><option value="quarterly">Cada 3 meses</option><option value="semiannual">Cada 6 meses</option><option value="yearly">Cada año</option></select></div><div class="field" id="weekday-field" hidden><label>Días de la semana</label><div class="weekday-picker"><label><input type="checkbox" class="weekday-choice" value="0">Dom</label><label><input type="checkbox" class="weekday-choice" value="1">Lun</label><label><input type="checkbox" class="weekday-choice" value="2">Mar</label><label><input type="checkbox" class="weekday-choice" value="3">Mié</label><label><input type="checkbox" class="weekday-choice" value="4">Jue</label><label><input type="checkbox" class="weekday-choice" value="5">Vie</label><label><input type="checkbox" class="weekday-choice" value="6">Sáb</label></div><small>Selecciona uno o varios días. Se repite desde la fecha inicial.</small></div><div class="field"><label for="until">Repetir hasta (opcional)</label><input type="date" id="until"></div></div><div class="row"><div class="field"><label for="duration">Duración estimada (minutos)</label><input id="duration" type="number" min="0" max="1440" step="5" placeholder="Ej. 20"></div><div class="field"><label for="level">Tipo de limpieza (opcional)</label><select id="level"><option value="">No aplica</option><option value="repaso">Repaso</option><option value="habitual">Habitual</option><option value="profunda">Profunda</option></select></div></div><div class="field"><label for="parts">Partes de la tarea (opcional; una por línea)</label><textarea id="parts" rows="3" placeholder="Ej. Limpiar mampara&#10;Desinfectar juntas&#10;Aclarar azulejos"></textarea><p class="form-hint">Cada parte tendrá su propia casilla. Puedes completarlas por separado.</p></div><div class="field" id="project-link-field" hidden><label for="inspirationUrl">Enlace de inspiración (opcional, Pinterest u otra web)</label><input id="inspirationUrl" type="url" maxlength="1000" placeholder="https://www.pinterest.com/..."><small>Solo se guarda el enlace; no se descarga ninguna fotografía.</small></div><div class="field"><label for="notes">Notas (opcionales; evita datos sensibles)</label><textarea id="notes" rows="2"></textarea></div><div class="row"><button type="button" id="cancel">Cancelar</button><button class="primary" type="submit">Guardar</button></div><div class="delete-action"><button type="button" id="delete-editor" class="danger" hidden>Eliminar esta actividad</button></div></form></dialog>
 <dialog id="filterdialog" class="filter-dialog" aria-labelledby="filtertitle"><header><h2 id="filtertitle">Filtrar tareas</h2><button type="button" class="close-filter" id="filterclose" aria-label="Cerrar sin cambiar">✕</button></header><div class="filter-options" id="filteroptions"></div><button type="button" id="filtercancel">Cancelar sin cambios</button></dialog>
 <script>
@@ -1972,7 +1972,7 @@ function doPrint(kind){
  document.body.classList.add('fenix-v81-print-active');window.print();
 }
 document.addEventListener('click',function(e){const b=e.target.closest('button');if(!b)return;
- if(b.matches('[data-fa-planner]')){e.preventDefault();e.stopImmediatePropagation();document.getElementById('fenix-v72-routines')?.scrollIntoView({behavior:'smooth',block:'start'});return}
+ if(b.matches('[data-fa-planner]')){e.preventDefault();e.stopImmediatePropagation();const shortcut=document.querySelector('#fenix-v91-home [data-v91-go="rutinas"]');if(shortcut){shortcut.click();requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById('fenix-v72-routines')?.scrollIntoView({behavior:'smooth',block:'start'})))}else{document.getElementById('fenix-v72-routines')?.scrollIntoView({behavior:'smooth',block:'start'})}return}
  if(b.matches('[data-fw-prev],[data-fw-next],[data-fw-mode],[data-fw-id],[data-fw-add],[data-fw-print],[data-fw-print-kind],[data-fw-print-close]')){e.preventDefault();e.stopImmediatePropagation();if(b.hasAttribute('data-fw-prev'))offset--;else if(b.hasAttribute('data-fw-next'))offset++;else if(b.dataset.fwMode)mode=b.dataset.fwMode;else if(b.dataset.fwId){const t=state.tasks.find(x=>String(x.id)===b.dataset.fwId);const d=weekDates()[Number(b.dataset.fwDay)];if(t&&d){if(mode==='plan')adjustPlan(t,d);else if(planned(t,d)){const key=t.id+'@'+d;state.done[key]=!state.done[key];save()}}}else if(b.hasAttribute('data-fw-add')){openPlanner();return}else if(b.hasAttribute('data-fw-print')){const menu=document.querySelector('#fenix-v72-routines .fw-print-menu');if(menu)menu.hidden=!menu.hidden;return}else if(b.hasAttribute('data-fw-print-close')){const menu=document.querySelector('#fenix-v72-routines .fw-print-menu');if(menu)menu.hidden=true;return}else if(b.hasAttribute('data-fw-print-kind')){doPrint(b.dataset.fwPrintKind);return}draw();}
  },true);
 window.addEventListener('afterprint',()=>document.body.classList.remove('fenix-v81-print-active'));
@@ -2223,7 +2223,7 @@ render();
 #fenix-v95-calendar-shortcut{display:block;width:100%;margin:8px 0 10px;border:1px solid #c7ddcf;border-radius:11px;background:#edf6ef;color:#28543c;font-weight:700;padding:11px 12px;min-height:44px;text-align:center}
 #fenix-v95-calendar-shortcut:focus-visible{outline:3px solid #428765;outline-offset:2px}
 </style>
-<script id="fenix-v95-calendar-shortcut">
+<script id="fenix-v95-calendar-shortcut-code">
 /* V95: acceso rápido sin cambiar permisos, credenciales ni sincronización. */
 (function(){'use strict';
  const menu=document.querySelector('.section-menu');
@@ -2269,11 +2269,78 @@ render();
  function showScope(){field('week-wrap').hidden=field('scope').value!=='weekday';field('date-wrap').hidden=field('scope').value!=='date'}
  field('scope').addEventListener('change',showScope);
  document.addEventListener('click',e=>{const edit=e.target.closest('[data-v96-edit]');if(edit){e.preventDefault();currentId=edit.dataset.v96Edit;const t=state.tasks.find(x=>String(x.id)===currentId);if(!t)return;field('name').textContent=t.name;field('scope').value='general';field('date').value=typeof selected!=='undefined'?selected:new Date().toISOString().slice(0,10);field('time').value=t.time||'09:00';showScope();dlg.showModal();return}
- if(e.target.closest('[data-fa-planner]')){e.preventDefault();e.stopImmediatePropagation();const card=document.querySelector('[data-v91-go="rutinas"]');if(card)card.click();else document.getElementById('fenix-v72-routines')?.scrollIntoView({block:'start',behavior:'smooth'});return}
+
  },true);
  field('cancel').onclick=()=>dlg.close();field('full').onclick=()=>{const id=currentId;dlg.close();openEditor(id)};
  field('save').onclick=()=>{const t=state.tasks.find(x=>String(x.id)===currentId);if(!t||!field('time').value)return;const scope=field('scope').value,time=field('time').value;if(scope==='general'){t.time=time}else{const o=overrides();o[t.id] ||= {weekdays:{},dates:{}};o[t.id].weekdays ||= {};o[t.id].dates ||= {};if(scope==='weekday')o[t.id].weekdays[field('week').value]=time;else if(field('date').value)o[t.id].dates[field('date').value]=time;else return}save();dlg.close();render()};
  field('clear').onclick=()=>{const scope=field('scope').value;if(scope==='general'){alert('Para quitar la hora habitual utiliza «Editar nombre y demás datos».');return}const o=overrides()[currentId];if(o){if(scope==='weekday')delete (o.weekdays||{})[field('week').value];else delete (o.dates||{})[field('date').value]}save();dlg.close();render()};
+})();
+</script>
+
+<style id="fenix-v98-style">
+#fenix-v72-routines .fw-name .v98-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+#fenix-v72-routines .fw-name .v98-actions button{font-size:11px;padding:5px 7px;border:1px solid #c6d9cb;border-radius:7px;background:#fff;color:#28543c}
+#fenix-v72-routines .fw-name .v98-actions .v98-delete{color:#8b3535;border-color:#e0c7c7}
+</style>
+<script id="fenix-v98-routine-management">
+(function(){'use strict';
+ const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+ const findDuplicate=(name,id)=>state.tasks.find(t=>t.kind==='rutina'&&String(t.id)!==String(id||'')&&normalize(t.name)===normalize(name));
+ // Interceptar únicamente el guardado de rutinas, antes del controlador existente.
+ const form=document.getElementById('form');
+ if(form)form.addEventListener('submit',function(e){
+   const kind=document.getElementById('kind')?.value;
+   if(kind!=='rutina')return;
+   const name=document.getElementById('name')?.value||'';
+   const id=document.getElementById('id')?.value||'';
+   const dup=findDuplicate(name,id);
+   if(!dup)return;
+   e.preventDefault();e.stopImmediatePropagation();
+   if(confirm('Ya existe la rutina «'+dup.name+'».\n\nAceptar: editar la rutina existente.\nCancelar: volver sin crear un duplicado.')){
+     document.getElementById('editor')?.close();openEditor(dup.id);
+   }
+ },true);
+ // El listado semanal utiliza las rutinas reales. Las acciones no crean copias.
+ function decorate(){
+  document.querySelectorAll('#fenix-v72-routines tbody tr').forEach(row=>{
+   const name=row.querySelector('.fw-name');const cell=row.querySelector('[data-fw-id]');
+   if(!name||!cell||name.querySelector('.v98-actions'))return;
+   const id=cell.dataset.fwId;const t=state.tasks.find(t=>String(t.id)===String(id));if(!t)return;
+   const actions=document.createElement('div');actions.className='v98-actions';
+   const edit=document.createElement('button');edit.type='button';edit.textContent='Editar';edit.dataset.v98Edit=id;
+   const del=document.createElement('button');del.type='button';del.className='v98-delete';del.textContent='Eliminar';del.dataset.v98Delete=id;
+   actions.append(edit,del);name.appendChild(actions);
+  });
+ }
+ const view=document.getElementById('view');
+ if(view){const observer=new MutationObserver(()=>{observer.disconnect();decorate();observer.observe(view,{childList:true,subtree:true})});observer.observe(view,{childList:true,subtree:true});}
+ decorate();
+ document.addEventListener('click',function(e){
+  const edit=e.target.closest('[data-v98-edit]');if(edit){e.preventDefault();e.stopImmediatePropagation();openEditor(edit.dataset.v98Edit);return;}
+  const del=e.target.closest('[data-v98-delete]');if(!del)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  const id=del.dataset.v98Delete,t=state.tasks.find(x=>String(x.id)===String(id));if(!t)return;
+  if(!confirm('¿Eliminar «'+t.name+'» de la planificación?\n\nSe conservará una copia del historial de realizaciones en este navegador.'))return;
+  if(!state.routineArchive)state.routineArchive=[];
+  const done=Object.fromEntries(Object.entries(state.done||{}).filter(([k])=>k.startsWith(id+'@')));
+  const parts=Object.fromEntries(Object.entries(state.partsDone||{}).filter(([k])=>k.startsWith(id+'@')));
+  state.routineArchive.push({task:JSON.parse(JSON.stringify(t)),done,parts,archivedAt:new Date().toISOString()});
+  state.tasks=state.tasks.filter(x=>String(x.id)!==String(id));
+  if(state.routineTimes)delete state.routineTimes[id];
+  save();render();
+ },true);
+ // Eliminar desde la ficha usa la misma política de conservación de historial.
+ const deleteEditor=document.getElementById('delete-editor');
+ if(deleteEditor)deleteEditor.addEventListener('click',function(e){
+  const id=document.getElementById('id')?.value;
+  const t=state.tasks.find(x=>String(x.id)===String(id));if(!t||t.kind!=='rutina')return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(!confirm('¿Eliminar «'+t.name+'» de la planificación? Se conservará una copia de su historial en este navegador.'))return;
+  if(!state.routineArchive)state.routineArchive=[];
+  state.routineArchive.push({task:JSON.parse(JSON.stringify(t)),done:Object.fromEntries(Object.entries(state.done||{}).filter(([k])=>k.startsWith(id+'@'))),parts:Object.fromEntries(Object.entries(state.partsDone||{}).filter(([k])=>k.startsWith(id+'@'))),archivedAt:new Date().toISOString()});
+  state.tasks=state.tasks.filter(x=>String(x.id)!==String(id));if(state.routineTimes)delete state.routineTimes[id];
+  save();document.getElementById('editor')?.close();render();
+ },true);
 })();
 </script>
 </body></html>
