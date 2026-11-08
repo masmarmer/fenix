@@ -1698,6 +1698,7 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
+
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -2667,6 +2668,65 @@ document.addEventListener('click',function(event){
   }
  },true);
  document.addEventListener('change',e=>{if(e.target.id==='fenix-exercise-month')fillStats()});
+ render();
+})();
+</script>
+<style id="fenix-v115-style">
+#fenix-v107-week .fenix-v115-open{display:inline-flex;align-items:center;justify-content:center;min-height:34px;margin:2px 0 9px;padding:5px 11px;border:1px solid #bad5c4;border-radius:8px;background:#eef7f0;color:#285b42;font-size:12px;font-weight:700;cursor:pointer}
+.month-day.fenix-v115-holiday{background:#fff1ee;border:1px solid #d89b91}
+.month-day .fenix-v115-holiday-tag{display:block;font-size:10px;color:#963f36;line-height:1.25;margin-top:3px;overflow-wrap:anywhere}
+.fenix-v115-holiday-list{margin-top:14px;padding:12px;background:#fff9f6;border:1px solid #f0d6d0;border-radius:10px}
+.fenix-v115-holiday-list p{margin:7px 0;font-size:13px}
+</style>
+<script id="fenix-v115-navigation-holidays">
+/* V115: acceso al día desde Semana y festivos de referencia en Mes.
+   No cambia datos guardados ni sincronización con Google. */
+(function(){'use strict';
+ const originalRender=render;
+ render=function(){
+   originalRender();
+   if(searchText)return;
+   const view=document.getElementById('view');if(!view)return;
+   if(tab==='Semana'){
+     const start=parse(selected);start.setDate(start.getDate()-((start.getDay()+6)%7));
+     view.querySelectorAll('#fenix-v107-week .fenix-v107-day').forEach((card,i)=>{
+       const d=new Date(start);d.setDate(start.getDate()+i);
+       const key=iso(d),heading=card.querySelector('strong');
+       if(!heading||card.querySelector('[data-fenix-v115-open]'))return;
+       const btn=document.createElement('button');btn.type='button';btn.className='fenix-v115-open';
+       btn.dataset.fenixV115Open=key;btn.textContent='Ver día →';
+       btn.setAttribute('aria-label','Abrir actividades del '+heading.textContent);
+       heading.insertAdjacentElement('afterend',btn);
+     });
+   }
+   if(tab==='Mes'){
+     const found=[];
+     view.querySelectorAll('button[data-monthday]').forEach(btn=>{
+       const date=btn.dataset.monthday;
+       const name=typeof fenixHolidayAt==='function'?fenixHolidayAt(date):'';
+       if(!name)return;
+       found.push({date,name});btn.classList.add('fenix-v115-holiday');
+       const tag=document.createElement('span');tag.className='fenix-v115-holiday-tag';
+       tag.textContent='🔴 Festivo';btn.appendChild(tag);
+       btn.setAttribute('aria-label',btn.getAttribute('aria-label')+'. Festivo: '+name);
+       btn.title=name;
+     });
+     const panel=view.querySelector('.panel:has(button[data-monthday])');
+     if(panel){
+       const info=document.createElement('div');info.className='fenix-v115-holiday-list';
+       info.innerHTML='<strong>🔴 Festivos del mes</strong>'+
+         (found.length?found.map(h=>'<p><b>'+esc(parse(h.date).toLocaleDateString('es-ES',{day:'numeric',month:'long'}))+'</b> · '+esc(h.name)+'</p>').join(''):'<p>No hay festivos registrados para este mes.</p>')+
+         '<p class="subtle">Referencias generales precargadas para Andalucía en 2026 y festivos personalizados. Los festivos locales de Jerez y otros años requieren verificar o añadir sus fechas en la configuración de festivos. Los horarios comerciales pueden variar.</p>';
+       panel.appendChild(info);
+     }
+   }
+ };
+ document.addEventListener('click',function(e){
+   const btn=e.target.closest('[data-fenix-v115-open]');if(!btn)return;
+   e.preventDefault();e.stopImmediatePropagation();
+   selected=btn.dataset.fenixV115Open;tab='Hoy';render();
+   window.scrollTo({top:0,behavior:'instant'});
+ },true);
  render();
 })();
 </script>
