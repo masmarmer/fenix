@@ -365,7 +365,22 @@ function openPlanner(){
 }
 
 document.addEventListener('click',e=>{const toggle=e.target.closest('[data-plan-toggle]');if(!toggle)return;const detail=document.getElementById('fenix-plan-detail-'+toggle.dataset.planToggle);if(!detail)return;detail.hidden=!detail.hidden;toggle.setAttribute('aria-expanded',String(!detail.hidden));toggle.textContent=detail.hidden?'Ajustar ▾':'Cerrar ▴';});
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.openPlanner){openPlanner()}if(b.dataset.closePlanner){plannerDialog.close()}if(b.dataset.savePlanner){const selectedRows=[...plannerDialog.querySelectorAll('[data-plan-check]:checked')];if(!selectedRows.length&&![...plannerDialog.querySelectorAll('[data-custom-name]')].some(x=>x.value.trim())){alert('Selecciona o escribe al menos una rutina.');return}const additions=[];for(const row of selectedRows){const i=Number(row.dataset.planCheck),preset=FENIX_CATALOG[i]||['','','daily',[],''],repeat=plannerDialog.querySelector(`[data-plan-repeat="${i}"]`).value,time=plannerDialog.querySelector(`[data-plan-time="${i}"]`).value,weekdays=[...plannerDialog.querySelectorAll(`[data-plan-day="${i}"]:checked`)].map(n=>Number(n.value));if(repeat==='weekdays'&&!weekdays.length){alert('Selecciona al menos un día para «'+preset[0]+'».');return}additions.push({id:'t'+Date.now()+'-'+i+'-'+Math.random().toString(36).slice(2,6),name:preset[0],kind:'rutina',category:'Bienestar',owner:'Yo',area:'',date:today,time,repeat,weekdays,until:'',duration:'',level:'',parts:'',notes:'',intent:preset[0].startsWith('Recordatorio personal')?'important':'habit'})}const customRows=[...plannerDialog.querySelectorAll('.fenix-custom-row')];for(const el of customRows){const name=el.querySelector('[data-custom-name]').value.trim();if(!name)continue;const repeat=el.querySelector('[data-custom-repeat]').value;const weekdays=[...el.querySelectorAll('[data-custom-day]:checked')].map(x=>Number(x.value));if(repeat==='weekdays'&&!weekdays.length){alert('Selecciona días para «'+name+'».');return}additions.push({id:'t'+Date.now()+'-custom-'+Math.random().toString(36).slice(2,8),name:name.slice(0,150),kind:'rutina',category:'Bienestar',owner:'Yo',area:'',date:today,time:el.querySelector('[data-custom-time]').value,repeat,weekdays,until:'',duration:'',level:'',parts:'',notes:'',intent:'habit'})}state.tasks.push(...additions);save();plannerDialog.close();render();alert('Se han añadido '+additions.length+' rutinas. Puedes editarlas desde Bienestar.') }});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.openPlanner){openPlanner()}if(b.dataset.closePlanner){plannerDialog.close()}if(b.dataset.savePlanner){const selectedRows=[...plannerDialog.querySelectorAll('[data-plan-check]:checked')];if(!selectedRows.length&&![...plannerDialog.querySelectorAll('[data-custom-name]')].some(x=>x.value.trim())){alert('Selecciona o escribe al menos una rutina.');return}const additions=[];for(const row of selectedRows){const i=Number(row.dataset.planCheck),preset=FENIX_CATALOG[i]||['','','daily',[],''],repeat=plannerDialog.querySelector(`[data-plan-repeat="${i}"]`).value,time=plannerDialog.querySelector(`[data-plan-time="${i}"]`).value,weekdays=[...plannerDialog.querySelectorAll(`[data-plan-day="${i}"]:checked`)].map(n=>Number(n.value));if(repeat==='weekdays'&&!weekdays.length){alert('Selecciona al menos un día para «'+preset[0]+'».');return}additions.push({id:'t'+Date.now()+'-'+i+'-'+Math.random().toString(36).slice(2,6),name:preset[0],kind:'rutina',category:'Bienestar',owner:'Yo',area:'',date:today,time,repeat,weekdays,until:'',duration:'',level:'',parts:'',notes:'',intent:preset[0].startsWith('Recordatorio personal')?'important':'habit'})}const customRows=[...plannerDialog.querySelectorAll('.fenix-custom-row')];for(const el of customRows){const name=el.querySelector('[data-custom-name]').value.trim();if(!name)continue;const repeat=el.querySelector('[data-custom-repeat]').value;const weekdays=[...el.querySelectorAll('[data-custom-day]:checked')].map(x=>Number(x.value));if(repeat==='weekdays'&&!weekdays.length){alert('Selecciona días para «'+name+'».');return}additions.push({id:'t'+Date.now()+'-custom-'+Math.random().toString(36).slice(2,8),name:name.slice(0,150),kind:'rutina',category:'Bienestar',owner:'Yo',area:'',date:today,time:el.querySelector('[data-custom-time]').value,repeat,weekdays,until:'',duration:'',level:'',parts:'',notes:'',intent:'habit'})}const normalizeRoutineName=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+const already=new Map(state.tasks.filter(t=>t.kind==='rutina').map(t=>[normalizeRoutineName(t.name),t]));
+const pending=new Set();
+for(const proposed of additions){
+ const key=normalizeRoutineName(proposed.name);
+ if(already.has(key)){
+  const original=already.get(key);
+  if(confirm('Ya existe la rutina «'+original.name+'».\n\n¿Quieres abrirla para editarla?\n\nAceptar: editar la existente. Cancelar: no añadir duplicados.')){
+   plannerDialog.close();openEditor(original.id);
+  }
+  return;
+ }
+ if(pending.has(key)){alert('Has seleccionado dos veces «'+proposed.name+'». Revisa tu selección.');return;}
+ pending.add(key);
+}
+state.tasks.push(...additions);save();plannerDialog.close();render();alert('Se han añadido '+additions.length+' rutinas. Puedes editarlas desde Bienestar.') }});
 
 
 /* FÉNIX V79: los días reflejan la frecuencia elegida en el planificador. */
@@ -1630,49 +1645,6 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 #fenix-v72-routines .fw-name .v98-actions button{padding:4px 5px;font-size:10px}
 #fenix-v72-routines .fw-name{min-width:0;overflow-wrap:anywhere}
 </style>
-
-<script id="fenix-v100-duplicate-guard">
-/* V100: validación en las DOS vías de creación (planificador y ficha). */
-(function(){
-'use strict';
-const norm = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
-const existing = (name,exceptId) => state.tasks.find(t=>t.kind==='rutina'&&String(t.id)!==String(exceptId||'')&&norm(t.name)===norm(name));
-function warn(name, match){
- const edit=confirm('Esta rutina ya existe: «'+match.name+'».\n\nPulsa Aceptar para editar la existente, o Cancelar para volver sin crear otra copia.');
- if(edit){document.getElementById('fenix-planner-dialog')?.close();document.getElementById('editor')?.close();openEditor(match.id);}
-}
-document.addEventListener('click',function(e){
- const button=e.target.closest('[data-save-planner]');
- if(!button)return;
- const dlg=document.getElementById('fenix-planner-dialog');
- if(!dlg?.open)return;
- const names=[
-  ...[...dlg.querySelectorAll('[data-plan-check]:checked')].map(input=>(FENIX_CATALOG[Number(input.dataset.planCheck)]||[])[0]),
-  ...[...dlg.querySelectorAll('[data-custom-name]')].map(input=>input.value.trim()).filter(Boolean)
- ];
- const seen=new Map();
- for(const name of names){
-  if(!name)continue;
-  const match=existing(name);
-  if(match){e.preventDefault();e.stopImmediatePropagation();warn(name,match);return;}
-  if(seen.has(norm(name))){
-   e.preventDefault();e.stopImmediatePropagation();
-   alert('Has seleccionado dos veces «'+name+'». Deja una sola antes de guardar.');
-   return;
-  }
-  seen.set(norm(name),true);
- }
-},true);
-document.getElementById('form')?.addEventListener('submit',function(e){
- const kind=document.getElementById('kind')?.value;
- if(kind!=='rutina')return;
- const name=document.getElementById('name')?.value||'';
- const id=document.getElementById('id')?.value||'';
- const match=existing(name,id);
- if(match){e.preventDefault();e.stopImmediatePropagation();warn(name,match);}
-},true);
-})();
-</script>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
