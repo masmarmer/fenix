@@ -2203,7 +2203,7 @@ render();
   if(e.target.closest('[data-v92-expand]')){chosen='inspiracion';update();const section=document.getElementById('fenix-inspiration');if(section){section.querySelectorAll('details#fenix-v86-inspiration,details#fenix-v87-inspiration').forEach(d=>d.open=true);section.scrollIntoView({block:'start',behavior:'smooth'})}return}
  });
  document.addEventListener('click',function(e){if(!e.target.closest('[data-v93-back]'))return;chosen='inicio';if(typeof tab!=='undefined')tab='Hoy';if(typeof searchText!=='undefined')searchText='';const search=document.getElementById('search');if(search)search.value='';update();document.getElementById('fenix-v91-home')?.scrollIntoView({block:'start',behavior:'smooth'});});
- document.addEventListener('click',function(e){const b=e.target.closest('[data-v91-go]');if(!b)return;chosen=b.dataset.v91Go;update();document.getElementById('fenix-v91-home')?.scrollIntoView({block:'start',behavior:'smooth'});});
+ document.addEventListener('click',function(e){const b=e.target.closest('[data-v91-go]');if(!b)return;chosen=b.dataset.v91Go;update();(chosen==='todo'?document.getElementById('fenix-v91-home'):document.getElementById(ids[chosen])||document.getElementById('fenix-v91-home'))?.scrollIntoView({block:'start',behavior:'smooth'});});
  const previousRender=render;
  render=function(){previousRender();update()};
  update();
@@ -2237,6 +2237,43 @@ render();
    if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
  });
  menu.insertAdjacentElement('afterend',btn);
+})();
+</script>
+
+<style id="fenix-v96-style">
+#fenix-v72-routines .fw-name button{font-size:11px;padding:4px 6px;margin-top:4px;border:1px solid #bed5c5;border-radius:6px;background:#fff;color:#28543c}
+#fenix-v72-routines .fw-cell.fw-special{border:2px solid #397653;background:#e1f1e7}
+#fenix-v96-editor{border:1px solid #bfd4c5;border-radius:15px;max-width:min(94vw,460px);width:100%;padding:20px;background:#fff;color:#294637}
+#fenix-v96-editor::backdrop{background:rgba(0,0,0,.45)}
+#fenix-v96-editor label{display:block;margin:12px 0 4px;font-weight:650}
+#fenix-v96-editor input,#fenix-v96-editor select{width:100%;padding:10px;border:1px solid #c5d6c9;border-radius:8px;font:inherit}
+#fenix-v96-editor .v96-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+#fenix-v96-editor button{padding:10px;border:1px solid #b9d3c1;border-radius:9px;background:#e9f3ec;color:#28543c}
+</style>
+<dialog id="fenix-v96-editor" aria-labelledby="fenix-v96-title"><h2 id="fenix-v96-title">Editar rutina</h2><p id="fenix-v96-name"></p><label for="fenix-v96-scope">Qué quieres modificar</label><select id="fenix-v96-scope"><option value="general">Horario habitual de toda la rutina</option><option value="weekday">Horario de un día de la semana</option><option value="date">Solo una fecha concreta</option></select><div id="fenix-v96-week-wrap" hidden><label for="fenix-v96-week">Día de la semana</label><select id="fenix-v96-week"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option><option value="0">Domingo</option></select></div><div id="fenix-v96-date-wrap" hidden><label for="fenix-v96-date">Fecha concreta</label><input id="fenix-v96-date" type="date"></div><label for="fenix-v96-time">Nueva hora</label><input id="fenix-v96-time" type="time" required><div class="v96-buttons"><button type="button" id="fenix-v96-save">Guardar horario</button><button type="button" id="fenix-v96-clear">Quitar excepción</button><button type="button" id="fenix-v96-full">Editar nombre y demás datos</button><button type="button" id="fenix-v96-cancel">Cancelar</button></div><p style="font-size:12px;color:#65796b">Las excepciones no cambian las rutinas ya completadas. La hora habitual se puede editar también desde la ficha completa.</p></dialog>
+<script id="fenix-v96-fixes">
+(function(){'use strict';
+ const dlg=document.getElementById('fenix-v96-editor');let currentId='';
+ const field=id=>document.getElementById('fenix-v96-'+id);
+ function overrides(){if(!state.routineTimes||typeof state.routineTimes!=='object')state.routineTimes={};return state.routineTimes}
+ function effective(t,d){const o=overrides()[t.id]||{};return (o.dates||{})[d]||(o.weekdays||{})[parse(d).getDay()]||t.time||''}
+ function decorate(){const section=document.getElementById('fenix-v72-routines');if(!section||section.classList.contains('v91-hidden'))return;
+ const dates=[...section.querySelectorAll('thead th[title]')].map(x=>x.title);
+ section.querySelectorAll('tbody tr').forEach(row=>{const first=row.querySelector('.fw-name');if(!first)return;const cell=row.querySelector('[data-fw-id]');if(!cell)return;const t=state.tasks.find(x=>String(x.id)===cell.dataset.fwId);if(!t)return;
+ const small=first.querySelector('small');if(small)small.textContent=t.time||'Flexible';
+ if(!first.querySelector('[data-v96-edit]')){const btn=document.createElement('button');btn.type='button';btn.dataset.v96Edit=t.id;btn.textContent='✎ Horarios';first.appendChild(btn)}
+ row.querySelectorAll('[data-fw-day]').forEach(btn=>{const d=dates[Number(btn.dataset.fwDay)];if(!d)return;const time=effective(t,d);if(time){btn.title='Hora: '+time;btn.setAttribute('aria-label',btn.getAttribute('aria-label')+' · '+time);if(time!==t.time){btn.classList.add('fw-special');btn.textContent=btn.textContent.trim()+' '+time}}});
+ });}
+ const observer=new MutationObserver(()=>{if(!document.getElementById('fenix-v72-routines'))return;observer.disconnect();decorate();observer.observe(document.getElementById('view'),{childList:true,subtree:true})});
+ const view=document.getElementById('view');if(view)observer.observe(view,{childList:true,subtree:true});decorate();
+ function showScope(){field('week-wrap').hidden=field('scope').value!=='weekday';field('date-wrap').hidden=field('scope').value!=='date'}
+ field('scope').addEventListener('change',showScope);
+ document.addEventListener('click',e=>{const edit=e.target.closest('[data-v96-edit]');if(edit){e.preventDefault();currentId=edit.dataset.v96Edit;const t=state.tasks.find(x=>String(x.id)===currentId);if(!t)return;field('name').textContent=t.name;field('scope').value='general';field('date').value=typeof selected!=='undefined'?selected:new Date().toISOString().slice(0,10);field('time').value=t.time||'09:00';showScope();dlg.showModal();return}
+ if(e.target.closest('[data-fa-planner]')){e.preventDefault();e.stopImmediatePropagation();const card=document.querySelector('[data-v91-go="rutinas"]');if(card)card.click();else document.getElementById('fenix-v72-routines')?.scrollIntoView({block:'start',behavior:'smooth'});return}
+ },true);
+ field('cancel').onclick=()=>dlg.close();field('full').onclick=()=>{const id=currentId;dlg.close();openEditor(id)};
+ field('save').onclick=()=>{const t=state.tasks.find(x=>String(x.id)===currentId);if(!t||!field('time').value)return;const scope=field('scope').value,time=field('time').value;if(scope==='general'){t.time=time}else{const o=overrides();o[t.id] ||= {weekdays:{},dates:{}};o[t.id].weekdays ||= {};o[t.id].dates ||= {};if(scope==='weekday')o[t.id].weekdays[field('week').value]=time;else if(field('date').value)o[t.id].dates[field('date').value]=time;else return}save();dlg.close();render()};
+ field('clear').onclick=()=>{const scope=field('scope').value;if(scope==='general'){alert('Para quitar la hora habitual utiliza «Editar nombre y demás datos».');return}const o=overrides()[currentId];if(o){if(scope==='weekday')delete (o.weekdays||{})[field('week').value];else delete (o.dates||{})[field('date').value]}save();dlg.close();render()};
 })();
 </script>
 </body></html>
