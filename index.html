@@ -1217,10 +1217,13 @@ function fenixGoogleEvent(f){
  }else{
   e.start={date:f.start};e.end={date:fenixPlusDays(f.start,1)};
  }
+ // Google exige timeZone explícita para recurrencias con dateTime.
+ if(e.start.dateTime){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Madrid';e.start.timeZone=tz;e.end.timeZone=tz;}
  if(yearly)e.recurrence=['RRULE:FREQ=YEARLY'];
  e.reminders={useDefault:false,overrides:f.type==='padre'?[{method:'popup',minutes:60}]:
   (f.type==='cumple'||f.type==='santo')?[{method:'popup',minutes:1440},{method:'popup',minutes:0}]:[{method:'popup',minutes:1440}]};
  e.extendedProperties={private:{fenixId:f.id}};
+ if(e.start.dateTime){e.start.timeZone="Europe/Madrid";e.end.timeZone="Europe/Madrid";}
  return e;
 }
 async function fenixGoogleSync(){if(!fenixGoogleCfg.calendarId||document.getElementById('fenix-google-cal')?.value===''){fenixGoogleStatus('Selecciona primero el calendario correcto. No se ha enviado nada.');return}if(fenixGoogleBusy)return;fenixGoogleBusy=true;try{
@@ -1496,6 +1499,7 @@ function fenixAppointmentEvent(t){
   e.start={dateTime:fenixLocalGoogleDateTime(start,t.time)};
   e.end={dateTime:fenixLocalGoogleEnd(start,t.time,Number(t.duration)||60)};
  }else{e.start={date:start};e.end={date:fenixPlusDays(start,1)}}
+ if(e.start.dateTime){e.start.timeZone="Europe/Madrid";e.end.timeZone="Europe/Madrid";}
  return e;
 }
 async function fenixVerifyAppointmentOwnership(calendarId,eventId,id){
@@ -1548,6 +1552,35 @@ document.addEventListener('click',async e=>{
   });
  }catch(err){alert('No se ha eliminado la cita: '+err.message)}finally{b.disabled=false}
 },true);
+</script>
+<style id="fenix-v121-google-style">#fenix-google-appointment-status{display:block;padding:9px 12px;margin:8px 0;border-radius:9px;background:#edf4ef;color:#285640;font-size:.91rem}#fenix-google-appointment-retry{margin:7px 0;padding:9px 12px;max-width:100%}</style>
+<script id="fenix-v121-google-status">
+/* Estado conservador: vínculo registrado no equivale a verificación actual en Google. */
+function fenixV121EditorStatus(){
+ const field=document.getElementById('appointmentGoogle');if(!field)return;
+ let note=document.getElementById('fenix-google-appointment-status');
+ if(!note){note=document.createElement('span');note.id='fenix-google-appointment-status';field.closest('label').insertAdjacentElement('afterend',note)}
+ let retry=document.getElementById('fenix-google-appointment-retry');
+ if(!retry){retry=document.createElement('button');retry.type='button';retry.id='fenix-google-appointment-retry';retry.textContent='Comprobar / enviar esta cita a Google';note.insertAdjacentElement('afterend',retry)}
+ const id=document.getElementById('id').value,t=state.tasks.find(x=>x.id===id);
+ const link=id&&fenixGoogleCfg.links[fenixAppointmentLinkKey(id)];
+ if(!field.checked){note.textContent='Solo FÉNIX: marca esta casilla si quieres enviar la cita a Google.';retry.hidden=true}
+ else if(link?.eventId){note.textContent='Enlace con Google guardado. Pulsa comprobar para verificar que el evento sigue allí.';retry.hidden=false}
+ else{note.textContent='Pendiente de enviar a Google. La cita no está confirmada en Google todavía.';retry.hidden=!t}
+}
+const fenixV121OpenEditor=openEditor;
+openEditor=function(id){fenixV121OpenEditor(id);fenixV121EditorStatus()};
+document.addEventListener('change',e=>{if(e.target.id==='appointmentGoogle')fenixV121EditorStatus()});
+document.addEventListener('click',async e=>{
+ if(e.target.id!=='fenix-google-appointment-retry')return;
+ const id=document.getElementById('id').value,t=state.tasks.find(x=>x.id===id);
+ if(!t||t.kind!=='cita'||!t.appointmentGoogle)return alert('Guarda primero la cita con la opción Google activada.');
+ if(!fenixV47Connected())return alert('Google no está conectado. Autoriza la conexión antes de continuar.');
+ const link=fenixGoogleCfg.links[fenixAppointmentLinkKey(id)];
+ if(link?.eventId){try{await fenixVerifyAppointmentOwnership(link.calendarId,link.eventId,id);alert('Verificado: la cita existe en Google Calendar.')}catch(err){alert('No se ha podido verificar la cita en Google: '+err.message+' No se creará un duplicado automáticamente.')}return}
+ if(!confirm('Esta cita no tiene un enlace de Google registrado. ¿Intentar enviarla ahora? Comprueba primero que no esté ya en Google para evitar duplicados.'))return;
+ fenixAppointmentSaved(t);
+});
 </script>
 
 <script>
@@ -2822,4 +2855,35 @@ html,body{max-width:100%;overflow-x:hidden}#fenix-habit-tracker{min-width:0;max-
  #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
 }
 </style>
+<style id="fenix-v122-style">
+#fenix-google-health{position:sticky;top:0;z-index:25;padding:9px 13px;border-radius:10px;margin:7px 0;background:#f5f1e6;color:#604a21;font-size:.9rem;box-shadow:0 1px 5px #0001}
+#fenix-google-health.ok{background:#eaf4ed;color:#24523c}#fenix-google-health button{margin:4px 5px 2px 0;padding:6px 10px;font-size:.85rem}
+</style>
+<script id="fenix-v123-connection-notices">
+/* Los tokens OAuth del navegador son temporales: "actualizar" no equivale a desconexión de la cuenta. */
+(function(){
+ const oldOpen=openEditor;
+ openEditor=function(id){oldOpen(id);const kind=document.getElementById('kind');const google=document.getElementById('appointmentGoogle');if(!id&&google){google.checked=true;const kindSelect=document.getElementById('kind');kindSelect?.addEventListener('change',()=>{if(kindSelect.value==='cita')google.checked=true},{once:true});}};
+ const oldStatus=fenixGoogleStatus;
+ fenixGoogleStatus=function(message){oldStatus(message);setTimeout(update,0)};
+ const oldApi=fenixGoogleAPI;
+ fenixGoogleAPI=async function(...args){try{return await oldApi(...args)}catch(err){if(err.status===401)window.fenixGoogleNeedsRenewal=true;setTimeout(update,0);throw err}};
+ function pending(){return (state.tasks||[]).filter(t=>t.kind==='cita'&&t.appointmentGoogle&&!fenixGoogleCfg.links?.[fenixAppointmentLinkKey(t.id)]?.eventId)}
+ function update(){
+  const root=document.querySelector('main')||document.querySelector('#app')||document.body;
+  let bar=document.getElementById('fenix-google-health');if(!bar){bar=document.createElement('div');bar.id='fenix-google-health';bar.setAttribute('role','status');root.insertAdjacentElement('afterbegin',bar)}
+  const n=pending().length,connected=!!fenixGoogleToken;
+  bar.classList.toggle('ok',connected&&!window.fenixGoogleNeedsRenewal&&!n);
+  bar.replaceChildren();const label=document.createElement('span');
+  label.textContent=(connected&&!window.fenixGoogleNeedsRenewal?'✓ Google autorizado':'⚠ Google Calendar: actualizar conexión')+(n?' · '+n+' cita'+(n===1?'':'s')+' pendiente'+(n===1?'':'s')+' de enviar':'');bar.appendChild(label);
+  if(!connected||window.fenixGoogleNeedsRenewal){const b=document.createElement('button');b.textContent='Actualizar conexión';b.onclick=async()=>{try{await fenixGoogleConnect();window.fenixGoogleNeedsRenewal=false;update()}catch(err){alert('No se ha podido renovar Google: '+err.message);update()}};bar.appendChild(b)}
+  if(n&&connected){const b=document.createElement('button');b.textContent='Revisar citas pendientes';b.onclick=()=>{const list=pending();alert('Citas pendientes de Google:\n'+list.slice(0,15).map(t=>'• '+t.date+' — '+t.name).join('\n')+'\n\nAbre cada cita y pulsa «Comprobar / enviar esta cita a Google». Antes verifica que no esté ya en Google para evitar duplicados.');};bar.appendChild(b)}
+ }
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
+ document.addEventListener('click',e=>{if(e.target.closest('[data-google-connect],[data-google-disconnect]'))setTimeout(update,500);if(e.target.closest('#fenix-google-appointment-retry'))setTimeout(update,1500)});
+ const originalSave=fenixGoogleSave;fenixGoogleSave=function(...args){const r=originalSave(...args);setTimeout(update,0);return r};
+ const originalLocalSave=save;save=function(...args){const r=originalLocalSave(...args);setTimeout(update,0);return r};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
+})();
+</script>
 </body></html>
