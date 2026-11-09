@@ -1751,38 +1751,6 @@ const report=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
  #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
 }
 </style>
-
-<script>
-/* V126: tareas puntuales sin hora visibles y gestionables en el resumen diario. */
-(function(){
- const oldAssistantMarkup=assistMarkup;
- assistMarkup=function(){
-  let html=oldAssistantMarkup();
-  if(assistantView!=='resumen')return html;
-  const list=state.tasks.filter(t=>t.kind==='tarea'&&t.repeat==='none'&&t.date===selected&&!t.time);
-  const section='<div class="fenix-v126-pending" style="margin-top:14px;border-top:1px solid #d7e3dc;padding-top:12px"><strong>Pendientes sin hora ('+list.length+')</strong>'+
-   (list.length?list.map(t=>{
-    const done=!!state.done[t.id+'@'+selected];
-    return '<div style="padding:10px 0;border-bottom:1px solid #e2e9e5"><label style="display:flex;gap:9px;align-items:flex-start"><input type="checkbox" data-check="'+esc(t.id)+'" data-date="'+selected+'" '+(done?'checked':'')+'><span style="'+(done?'text-decoration:line-through;opacity:.65':'')+'">'+esc(t.name)+'</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px"><button type="button" class="mini" data-fenix-v126-move="'+esc(t.id)+'">Cambiar fecha</button><button type="button" class="mini" data-edit="'+esc(t.id)+'">Editar</button></div></div>';
-   }).join(''):'<p>No hay tareas puntuales sin hora para este día.</p>')+'</div>';
-  return html.replace(/<\/section>\s*$/,section+'</section>');
- };
- document.addEventListener('click',function(e){
-  const b=e.target.closest('[data-fenix-v126-move]');if(!b)return;
-  const t=state.tasks.find(x=>x.id===b.dataset.fenixV126Move);
-  if(!t||t.kind!=='tarea'||t.repeat!=='none')return;
-  const tomorrow=iso(new Date(parse(t.date).getTime()+86400000));
-  const value=prompt('Nueva fecha para «'+t.name+'» (AAAA-MM-DD).\nMañana: '+tomorrow,tomorrow);
-  if(value===null)return;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||!Number.isFinite(parse(value).getTime())||iso(parse(value))!==value){alert('Fecha no válida. Usa AAAA-MM-DD.');return}
-  if(value===t.date)return;
-  if(state.done[t.id+'@'+t.date]){alert('Esta tarea ya está marcada como realizada. Desmárcala antes de cambiar su fecha.');return}
-  const old=t.date;t.date=value;
-  save();render();
-  alert('«'+t.name+'» se ha trasladado del '+old+' al '+value+'.');
- });
-})();
-</script>
 </body></html>`;
 const w=window.open('','_blank');if(!w){alert('El navegador ha bloqueado la ventana del informe. Permite ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(report);w.document.close();w.focus();setTimeout(()=>w.print(),350);
 });
@@ -1851,38 +1819,6 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
  #fenix-hb-print-sheet .hb-name{font-size:10pt!important}
 }
 </style>
-
-<script>
-/* V126: tareas puntuales sin hora visibles y gestionables en el resumen diario. */
-(function(){
- const oldAssistantMarkup=assistMarkup;
- assistMarkup=function(){
-  let html=oldAssistantMarkup();
-  if(assistantView!=='resumen')return html;
-  const list=state.tasks.filter(t=>t.kind==='tarea'&&t.repeat==='none'&&t.date===selected&&!t.time);
-  const section='<div class="fenix-v126-pending" style="margin-top:14px;border-top:1px solid #d7e3dc;padding-top:12px"><strong>Pendientes sin hora ('+list.length+')</strong>'+
-   (list.length?list.map(t=>{
-    const done=!!state.done[t.id+'@'+selected];
-    return '<div style="padding:10px 0;border-bottom:1px solid #e2e9e5"><label style="display:flex;gap:9px;align-items:flex-start"><input type="checkbox" data-check="'+esc(t.id)+'" data-date="'+selected+'" '+(done?'checked':'')+'><span style="'+(done?'text-decoration:line-through;opacity:.65':'')+'">'+esc(t.name)+'</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px"><button type="button" class="mini" data-fenix-v126-move="'+esc(t.id)+'">Cambiar fecha</button><button type="button" class="mini" data-edit="'+esc(t.id)+'">Editar</button></div></div>';
-   }).join(''):'<p>No hay tareas puntuales sin hora para este día.</p>')+'</div>';
-  return html.replace(/<\/section>\s*$/,section+'</section>');
- };
- document.addEventListener('click',function(e){
-  const b=e.target.closest('[data-fenix-v126-move]');if(!b)return;
-  const t=state.tasks.find(x=>x.id===b.dataset.fenixV126Move);
-  if(!t||t.kind!=='tarea'||t.repeat!=='none')return;
-  const tomorrow=iso(new Date(parse(t.date).getTime()+86400000));
-  const value=prompt('Nueva fecha para «'+t.name+'» (AAAA-MM-DD).\nMañana: '+tomorrow,tomorrow);
-  if(value===null)return;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||!Number.isFinite(parse(value).getTime())||iso(parse(value))!==value){alert('Fecha no válida. Usa AAAA-MM-DD.');return}
-  if(value===t.date)return;
-  if(state.done[t.id+'@'+t.date]){alert('Esta tarea ya está marcada como realizada. Desmárcala antes de cambiar su fecha.');return}
-  const old=t.date;t.date=value;
-  save();render();
-  alert('«'+t.name+'» se ha trasladado del '+old+' al '+value+'.');
- });
-})();
-</script>
 </body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
 </script>
@@ -2981,38 +2917,6 @@ html,body{max-width:100%;overflow-x:hidden}#fenix-habit-tracker{min-width:0;max-
  const originalSave=fenixGoogleSave;fenixGoogleSave=function(...args){const r=originalSave(...args);setTimeout(update,0);return r};
  const originalLocalSave=save;save=function(...args){const r=originalLocalSave(...args);setTimeout(update,0);return r};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
-})();
-</script>
-
-<script>
-/* V126: tareas puntuales sin hora visibles y gestionables en el resumen diario. */
-(function(){
- const oldAssistantMarkup=assistMarkup;
- assistMarkup=function(){
-  let html=oldAssistantMarkup();
-  if(assistantView!=='resumen')return html;
-  const list=state.tasks.filter(t=>t.kind==='tarea'&&t.repeat==='none'&&t.date===selected&&!t.time);
-  const section='<div class="fenix-v126-pending" style="margin-top:14px;border-top:1px solid #d7e3dc;padding-top:12px"><strong>Pendientes sin hora ('+list.length+')</strong>'+
-   (list.length?list.map(t=>{
-    const done=!!state.done[t.id+'@'+selected];
-    return '<div style="padding:10px 0;border-bottom:1px solid #e2e9e5"><label style="display:flex;gap:9px;align-items:flex-start"><input type="checkbox" data-check="'+esc(t.id)+'" data-date="'+selected+'" '+(done?'checked':'')+'><span style="'+(done?'text-decoration:line-through;opacity:.65':'')+'">'+esc(t.name)+'</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px"><button type="button" class="mini" data-fenix-v126-move="'+esc(t.id)+'">Cambiar fecha</button><button type="button" class="mini" data-edit="'+esc(t.id)+'">Editar</button></div></div>';
-   }).join(''):'<p>No hay tareas puntuales sin hora para este día.</p>')+'</div>';
-  return html.replace(/<\/section>\s*$/,section+'</section>');
- };
- document.addEventListener('click',function(e){
-  const b=e.target.closest('[data-fenix-v126-move]');if(!b)return;
-  const t=state.tasks.find(x=>x.id===b.dataset.fenixV126Move);
-  if(!t||t.kind!=='tarea'||t.repeat!=='none')return;
-  const tomorrow=iso(new Date(parse(t.date).getTime()+86400000));
-  const value=prompt('Nueva fecha para «'+t.name+'» (AAAA-MM-DD).\nMañana: '+tomorrow,tomorrow);
-  if(value===null)return;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||!Number.isFinite(parse(value).getTime())||iso(parse(value))!==value){alert('Fecha no válida. Usa AAAA-MM-DD.');return}
-  if(value===t.date)return;
-  if(state.done[t.id+'@'+t.date]){alert('Esta tarea ya está marcada como realizada. Desmárcala antes de cambiar su fecha.');return}
-  const old=t.date;t.date=value;
-  save();render();
-  alert('«'+t.name+'» se ha trasladado del '+old+' al '+value+'.');
- });
 })();
 </script>
 </body></html>
