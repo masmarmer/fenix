@@ -1965,7 +1965,18 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-fenix-ex
 const previousRender=render;
 let assistantView='resumen';
 let rested='normal';try{rested=localStorage.getItem('fenix-descanso-'+selected)||'normal'}catch(e){}
-function assistantTasks(){try{return entries(selected)||[]}catch(e){return []}}
+function assistantTasks(){try{
+ const moves=state.exerciseMoves||{};
+ return (entries(selected)||[]).map(t=>{
+  if(t.category!=='Ejercicio'||!/gimnasio|ejercicio/i.test(String(t.name||'')))return t;
+  let original=selected;
+  for(const [key,m] of Object.entries(moves)){
+   if(key.startsWith(String(t.id)+'@')&&m?.to===selected){original=key.slice(String(t.id).length+1);break;}
+  }
+  const time=moves[t.id+'@'+original]?.time||state.routineTimes?.[t.id]?.dates?.[original]||t.time;
+  return {...t,time};
+ });
+ }catch(e){return []}}
 function assistMarkup(){
  const all=assistantTasks();
  const routines=all.filter(t=>t.kind==='rutina');
@@ -2668,7 +2679,7 @@ document.addEventListener('click',function(event){
  occurs=function(t,d){if(!exercise(t))return originalOccurs(t,d);const m=moves();if(m[t.id+'@'+d]?.to&&m[t.id+'@'+d].to!==d)return false;for(const [key,v] of Object.entries(m)){if(key.startsWith(t.id+'@')&&v?.to===d&&key.slice(String(t.id).length+1)!==d)return true}return originalOccurs(t,d)};
  function origin(t,d){for(const [key,v] of Object.entries(moves()))if(key.startsWith(t.id+'@')&&v?.to===d)return key.slice(String(t.id).length+1);return d}
  function movedTime(t,d){const o=origin(t,d);return moves()[t.id+'@'+o]?.time||state.routineTimes?.[t.id]?.dates?.[o]||t.time||'08:00'}
- function shift(t,from,to,time){const m=moves(),o=origin(t,from);if(o!==from&&m[t.id+'@'+o])delete m[t.id+'@'+o];if(to===o){delete m[t.id+'@'+o];}else{m[t.id+'@'+o]={to,time}}const was=!!state.done[t.id+'@'+from];delete state.done[t.id+'@'+from];if(was)state.done[t.id+'@'+to]=true;else delete state.done[t.id+'@'+to]}
+ function shift(t,from,to,time){const m=moves(),o=origin(t,from);if(o!==from&&m[t.id+'@'+o])delete m[t.id+'@'+o];if(to===o){m[t.id+'@'+o]={to:o,time};}else{m[t.id+'@'+o]={to,time}}const was=!!state.done[t.id+'@'+from];delete state.done[t.id+'@'+from];if(was)state.done[t.id+'@'+to]=true;else delete state.done[t.id+'@'+to]}
  function show(t,d){document.getElementById('fenix-move-overlay')?.remove();const layer=document.createElement('div');layer.id='fenix-move-overlay';layer.innerHTML='<div class="move-panel" role="dialog" aria-modal="true" aria-labelledby="move-title"><h3 id="move-title">Cambiar día y hora</h3><p><strong>'+esc(t.name)+'</strong><br>Sesión del '+esc(d)+'. Solo se modifica esta sesión, no las siguientes.</p><label for="move-date">Nuevo día</label><input id="move-date" type="date" value="'+esc(d)+'"><label for="move-time">Hora</label><input id="move-time" type="time" value="'+esc(movedTime(t,d))+'"><div class="move-actions"><button type="button" data-move-cancel>Cancelar</button><button type="button" class="move-primary" data-move-save>Guardar cambio</button></div><p style="font-size:12px;color:#64766b">Si en el nuevo día hay otra sesión de ejercicio, se intercambiarán los días.</p></div>';document.body.appendChild(layer);layer.querySelector('[data-move-cancel]').onclick=()=>layer.remove();layer.addEventListener('click',e=>{if(e.target===layer)layer.remove()});layer.querySelector('[data-move-save]').onclick=()=>{const to=layer.querySelector('#move-date').value,time=layer.querySelector('#move-time').value;if(!validDate(to)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){alert('Selecciona una fecha y hora válidas.');return}if(to!==d){const other=state.tasks.find(x=>x.id!==t.id&&exercise(x)&&occurs(x,to));if(other){if(!confirm('El '+to+' está programado «'+other.name+'». ¿Quieres intercambiar las dos sesiones?'))return;const otherTime=movedTime(other,to);shift(other,to,d,otherTime)}}shift(t,d,to,time);save();layer.remove();render()};}
  document.addEventListener('click',function(e){const b=e.target.closest('[data-exercise-time]');if(!b)return;const t=state.tasks.find(x=>String(x.id)===b.dataset.exerciseTime);if(!exercise(t))return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();show(t,b.dataset.exerciseDate)},true);
  const prevRender=render;
