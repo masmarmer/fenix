@@ -1986,9 +1986,14 @@ function assistMarkup(){
  const pending=undone(all);
  const dated=all.filter(t=>t.time).sort((a,b)=>a.time.localeCompare(b.time));
  const items=arr=>arr.slice(0,5).map(t=>'<p>• '+(t.time?esc(t.time)+' · ':'')+esc(t.name)+'</p>').join('');
+ const untimed=all.filter(t=>!t.time&&t.kind==='tarea');
+ const untimedMarkup=untimed.length?'<div class="fenix-v127-pending"><strong>Pendientes sin hora</strong><p class="subtle">Puedes marcarlos como realizados o cambiar su fecha.</p>'+untimed.map(t=>{
+  const done=!!state.done[t.id+'@'+selected];
+  return '<div class="entry" style="flex-wrap:wrap;gap:8px"><label style="display:flex;align-items:center;gap:8px;flex:1 1 170px"><input type="checkbox" data-check="'+esc(t.id)+'" data-date="'+esc(selected)+'" '+(done?'checked':'')+' style="width:auto"><span style="'+(done?'text-decoration:line-through;opacity:.65':'')+'">'+esc(t.name)+'</span></label><button type="button" class="mini" data-edit="'+esc(t.id)+'">Cambiar fecha</button>'+(t.repeat==='none'&&!done?'<button type="button" class="mini" data-fenix-nextday="'+esc(t.id)+'">Pasar a mañana</button>':'')+'</div>';
+ }).join('')+'</div>':'<p>No hay tareas sin hora para este día.</p>';
  let result='';
  if(assistantView==='resumen'){
-   result='<strong>Tu día en un vistazo</strong><p>'+appointments.length+' citas o eventos · '+routines.length+' rutinas · '+other.length+' otras actividades.</p>'+(pending.length?'<p>Quedan '+pending.length+' actividades sin marcar como completadas.</p>':'<p>No hay actividades pendientes para este día.</p>')+(dated.length?'<strong>Con horario</strong>'+items(dated):'<p>No tienes actividades con hora asignada.</p>');
+   result='<strong>Tu día en un vistazo</strong><p>'+appointments.length+' citas o eventos · '+routines.length+' rutinas · '+other.length+' otras actividades.</p>'+(pending.length?'<p>Quedan '+pending.length+' actividades sin marcar como completadas.</p>':'<p>No hay actividades pendientes para este día.</p>')+(dated.length?'<strong>Con horario</strong>'+items(dated):'<p>No tienes actividades con hora asignada.</p>')+untimedMarkup;
  } else if(assistantView==='prioridades'){
    const priority=undone(appointments).concat(undone(other).filter(t=>t.time),undone(other).filter(t=>!t.time));
    result='<strong>Propuesta de prioridades</strong>'+(priority.length?items(priority):'<p>No hay compromisos o tareas puntuales pendientes.</p>')+'<p>Las rutinas son flexibles: puedes moverlas o saltarlas sin acumularlas.</p>';
@@ -2002,6 +2007,14 @@ render=function(){previousRender();try{rested=localStorage.getItem('fenix-descan
  if(!routines.querySelector('[data-open-planner]')){const action=document.createElement('button');action.type='button';action.className='mini';action.dataset.openPlanner='1';action.textContent='＋ Organizar mis rutinas';routines.appendChild(action)}
  view.insertBefore(panel,routines);};
 document.addEventListener('click',function(e){const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.faView){assistantView=btn.dataset.faView;render()}if(btn.dataset.faPlanner){const existing=document.querySelector('[data-open-planner]');if(existing)existing.click();else {const trigger=document.createElement('button');trigger.type='button';trigger.dataset.openPlanner='1';trigger.hidden=true;document.body.appendChild(trigger);trigger.click();trigger.remove()}}});
+document.addEventListener('click',function(e){
+ const btn=e.target.closest('button[data-fenix-nextday]');if(!btn)return;
+ const t=state.tasks.find(x=>x.id===btn.dataset.fenixNextday);
+ if(!t||t.kind!=='tarea'||t.repeat!=='none'||t.date!==selected||state.done[t.id+'@'+selected])return;
+ const next=iso(new Date(parse(selected).getTime()+86400000));
+ if(!confirm('¿Pasar «'+t.name+'» al '+parse(next).toLocaleDateString('es-ES')+'?'))return;
+ t.date=next;save();render();
+});
 document.addEventListener('change',function(e){if(e.target.name==='fa-rest'){rested=e.target.value;try{localStorage.setItem('fenix-descanso-'+selected,rested)}catch(e){}render()}});
 render();
 })();
