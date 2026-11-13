@@ -1891,7 +1891,8 @@ body.fenix-simple-home #tabs{display:none!important}
 .fenix-inspiration-actions button{min-height:44px;border:1px solid #cdded1;border-radius:10px;background:#f5faf6;color:#28543c}
 .fenix-inspiration-home .muted{text-align:center}
 .fenix-dashboard #fenix-inspiration[hidden]{display:none!important}
-</style></body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
+</style>
+</body></html>`;const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:0;height:0;border:0';document.body.appendChild(frame);frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(_){alert('No se pudo abrir la impresión.')}setTimeout(()=>frame.remove(),60000)};frame.srcdoc=page;}});
 })();
 </script>
 <script>
@@ -3175,6 +3176,108 @@ html,body{max-width:100%;overflow-x:hidden}#fenix-habit-tracker{min-width:0;max-
   }catch(err){if(status)status.textContent='No se han importado datos: '+err.message;}
  });
  document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-fenix-done]'))return;const k=el.dataset.fenixDone+'@'+selected;if(el.checked)state.done[k]=true;else delete state.done[k];save();render();});
+ render();
+})();
+</script>
+<style id="fenix-v142-style">
+#fenix-v107-week .fenix-v142-list{display:grid;gap:7px;margin-top:9px}
+#fenix-v107-week .fenix-v142-row{display:flex;align-items:center;gap:7px;padding:8px 5px;border-top:1px solid #e5eee7;min-width:0}
+#fenix-v107-week .fenix-v142-row input[type=checkbox]{flex:none;width:19px;height:19px;accent-color:#28734e}
+#fenix-v107-week .fenix-v142-info{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}
+#fenix-v107-week .fenix-v142-info small{display:block;color:#60756a;font-size:11px;margin-top:3px}
+#fenix-v107-week .fenix-v142-row button{flex:none;padding:6px 8px;font-size:12px;border:1px solid #b9d2c1;border-radius:8px;background:white;color:#275b41}
+#fenix-v107-week .fenix-v142-done .fenix-v142-info strong{text-decoration:line-through;opacity:.55}
+#fenix-v107-week .fenix-v107-day{min-width:0}
+#fenix-v107-week .fenix-v107-day>strong{font-size:15px}
+</style>
+<script id="fenix-v142-week-actions">
+/* V142: una agenda semanal operativa; conserva los registros y los estados de cada fecha. */
+(function(){
+ const previous=render;
+ render=function(){
+  previous();
+  if(tab!=='Semana'||searchText)return;
+  const view=document.getElementById('view'),panel=view?.querySelector('#fenix-v107-week');
+  if(!panel)return;
+  const base=parse(selected||today);base.setDate(base.getDate()-((base.getDay()+6)%7));
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return iso(d)});
+  const cards=panel.querySelectorAll('.fenix-v107-day');
+  cards.forEach((card,i)=>{
+   const date=days[i];
+   const tasks=entries(date).filter(t=>t.kind!=='proyecto'&&t.kind!=='rutina');
+   const professional=Array.isArray(state.professionalRecords)?state.professionalRecords.filter(p=>p.date===date):[];
+   const family=(typeof fenixFamily!=='undefined'&&typeof familyOnDay==='function')?fenixFamily.filter(f=>f.status!=='Cancelado'&&familyOnDay(f,date)):[];
+   const list=tasks.map(t=>({kind:'task',t,name:t.name,time:t.time||'',type:t.kind==='cita'?'Cita':'Tarea'}));
+   professional.forEach(p=>list.push({kind:'professional',name:p.title||p.name||'Actividad profesional',time:p.time||'',type:'Profesional'}));
+   family.forEach(f=>list.push({kind:'family',f,name:f.title,time:f.time||'',type:'Familia'}));
+   list.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+   const label=card.querySelector('strong')?.textContent||'';
+   card.innerHTML='<strong>'+esc(label)+'</strong><div class="fenix-v142-list">'+(list.length?list.map(x=>{
+    const isTask=x.kind==='task',done=isTask&&!!state.done[x.t.id+'@'+date];
+    const check=isTask&&x.t.kind!=='cita';
+    const checkbox=check?'<input type="checkbox" data-v142-check="'+esc(x.t.id)+'" data-v142-date="'+esc(date)+'" aria-label="Marcar '+esc(x.name)+'" '+(done?'checked':'')+'>':'<span aria-hidden="true">'+(x.type==='Cita'?'📅':'•')+'</span>';
+    const edit=isTask?'<button type="button" data-edit="'+esc(x.t.id)+'">Editar</button>':x.kind==='family'?'<button type="button" data-family-edit="'+esc(x.f.id)+'">Abrir</button>':'';
+    return '<div class="fenix-v142-row '+(done?'fenix-v142-done':'')+'">'+checkbox+'<span class="fenix-v142-info"><strong>'+esc(x.name)+'</strong><small>'+esc((x.time?x.time+' · ':'')+x.type)+'</small></span>'+edit+'</div>';
+   }).join(''):'<p class="subtle">Sin compromisos</p>')+'</div>';
+  });
+  const title=panel.querySelector('h2');if(title)title.textContent='📅 Mi agenda semanal · Gestionar actividades';
+  const desc=panel.querySelectorAll(':scope > p.subtle');if(desc[0])desc[0].textContent='Marca las tareas realizadas o pulsa Editar para cambiar su fecha, hora o detalles. Los cambios también se reflejan en Hoy y Mes.';
+  if(desc[1])desc[1].remove();
+  // La banda de días se conserva para cambiar de semana; evitamos una segunda lista redundante.
+  [...view.querySelectorAll('section.panel')].forEach(sec=>{
+   const h=sec.querySelector(':scope > h2');
+   if(h&&h.textContent.trim()==='Compromisos del día seleccionado')sec.style.display='none';
+  });
+ };
+ document.addEventListener('change',function(e){
+  const cb=e.target.closest('[data-v142-check]');if(!cb)return;
+  const key=cb.dataset.v142Check+'@'+cb.dataset.v142Date;
+  if(cb.checked)state.done[key]=true;else delete state.done[key];
+  save();render();
+ },true);
+ render();
+})();
+</script>
+
+<style id="fenix-v146-efemerides-style">
+.fenix-v144-efemeride{margin:12px 0;padding:14px;border:1px solid #dce8df;border-radius:14px;background:#f7faf6;color:#254b3a}
+.fenix-v144-efemeride h3{font-size:1rem;margin:0 0 7px}
+.fenix-v144-efemeride p{margin:0;line-height:1.5}
+.fenix-v144-efemeride small{display:block;margin-top:7px;color:#62776c}
+</style>
+<script id="fenix-v146-efemerides">
+/* Efemérides históricas seleccionadas: no son citas, recordatorios ni datos de Google. */
+(function(){'use strict';
+ const extra={
+  '11-13':{year:1971,text:'La sonda Mariner 9 entró en órbita alrededor de Marte; fue la primera nave en orbitar otro planeta.'},
+  '11-14':{year:1889,text:'La periodista Nellie Bly inició su viaje alrededor del mundo.'},
+  '11-15':{year:1920,text:'Se celebró en Ginebra la primera Asamblea de la Sociedad de Naciones.'},
+  '11-16':{year:1945,text:'Se firmó en Londres la Constitución de la UNESCO.'},
+  '11-17':{year:1869,text:'Se inauguró oficialmente el canal de Suez.'},
+  '11-18':{year:1928,text:'Se estrenó Steamboat Willie, uno de los primeros cortometrajes sonoros de animación sincronizada.'},
+  '11-19':{year:1863,text:'Abraham Lincoln pronunció el discurso de Gettysburg.'},
+  '11-20':{year:1989,text:'La Asamblea General de las Naciones Unidas adoptó la Convención sobre los Derechos del Niño.'}
+ };
+ const catalog=Object.assign({},typeof FENIX_EFEMERIDES!=='undefined'?FENIX_EFEMERIDES:{},extra);
+ const keyOf=date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)?date.slice(5):'';
+ const label=item=>item.year+' · '+item.text;
+ const previous=render;
+ render=function(){
+  previous();
+  if(searchText)return;
+  const view=document.getElementById('view');if(!view)return;
+  if(tab==='Hoy'){
+   const item=catalog[keyOf(selected)];
+   const existing=view.querySelector('#fenix-efemeride');if(existing)existing.remove();
+   const card=document.createElement('section');card.className='fenix-v144-efemeride';card.id='fenix-v144-today';
+   const heading=document.createElement('h3');heading.textContent='📜 Un día como hoy';card.append(heading);
+   const body=document.createElement('p');body.textContent=item?label(item):'No hay una efeméride histórica registrada para esta fecha.';card.append(body);
+   const note=document.createElement('small');note.textContent='Selección histórica, independiente de tus tareas y de Google Calendar.';card.append(note);
+   const anchor=view.querySelector('.fenix-inspiration-home')||view.querySelector('#fenix-inspiration')||view.querySelector('.fenix-dashboard');
+   if(anchor&&anchor!==view){anchor.insertAdjacentElement('afterend',card)}else view.prepend(card);
+  }
+
+ };
  render();
 })();
 </script>
